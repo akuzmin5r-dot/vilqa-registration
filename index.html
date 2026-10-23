@@ -1,411 +1,103 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VILQA Registration</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f4f6">
+  <meta name="description" content="Познакомься с VILQA — помощником, который подстроит питание под твой ритм.">
+  <title>Профиль — VILQA</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+:root{font-family:'Golos Text',sans-serif;color:#252b27;background:#f3f4f6;color-scheme:light;--ink:#252b27;--lime:#88ad3d;--line:#dfe5de;--error:#aa3028;--white:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:20px 14px 28px;font-size:14px;line-height:1.4;background:#f3f4f6}
+button,input,select{font:inherit;color:inherit;touch-action:manipulation}
+.container{max-width:440px;margin:auto}form{display:grid;gap:12px}
+.card{min-width:0;border-radius:20px;padding:22px;background:#fff}
+.card-heading{display:flex;align-items:center;gap:8px;margin-bottom:17px}
+.card[aria-labelledby="about-heading"] .card-heading{gap:20px;margin-bottom:25px;align-items:center}
+h1{font-size:25px;line-height:1.18;letter-spacing:-1px;font-weight:500;margin:0;flex:1;min-width:0}
+.header-mascot{width:49px;height:100px;object-fit:contain;flex:0 0 49px}
+h2{font-size:15px;line-height:1.25;letter-spacing:-.3px;font-weight:500;margin:0}
+.section-icon{display:flex;width:20px;height:20px;color:#6d7b69}.section-icon svg{width:20px;height:20px}
+.form-group{min-width:0}.field-label{display:block;font-size:11px;color:#7c8579;margin-bottom:7px;font-weight:400}
+.name-field{margin-bottom:16px}
+input[type=text],input[type=number],select{width:100%;min-width:0;height:50px;padding:12px 14px;border:1px solid #e2e7df;border-radius:12px;background:#f7f8f5;font-size:16px;outline:none}
+input::placeholder{color:#9ea79a;opacity:1}input:focus,select:focus{border-color:#88ad3d;box-shadow:0 0 0 3px #88ad3d18}
+.two-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.radio-group{display:grid;grid-template-columns:1fr 1fr;height:50px;padding:4px;gap:4px;border-radius:12px;background:#f0f3eb}
+.radio-option{position:relative}.radio-option input{position:absolute;opacity:0;width:1px;height:1px}
+.radio-option label{display:flex;align-items:center;justify-content:center;height:42px;border-radius:9px;font-size:15px;cursor:pointer;color:#7c8579}
+.radio-option input:checked+label{background:#dce9c8;color:#344b29;box-shadow:0 1px 3px #344b2910}
+.radio-option input:focus-visible+label{outline:2px solid #88ad3d;outline-offset:2px}
+.age-input,.metric-input{position:relative}.age-input input,.metric-input input{padding-right:38px}
+.input-unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:#879080;font-size:11px;pointer-events:none}
+.metrics-card{background:#dfe9f5}.metrics-card input{background:#ffffffd9;border-color:transparent}
+.preferences{background:#fff;border-radius:20px;padding:5px 20px}
+.preference-card{padding:14px 0;display:grid;grid-template-columns:20px minmax(0,1fr) minmax(110px,45%);gap:8px;align-items:center;background:transparent;border-radius:0}
+.preference-card+.preference-card{border-top:1px solid #eef0eb}
+.preference-icon{width:19px;height:19px;fill:none;stroke:#7a896e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.preference-card p{display:none}.preference-card select{height:46px;font-size:12px;padding:10px 25px 10px 11px;background-color:#f7f8f5;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m1 1 4 4 4-4' stroke='%2365775b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.submit-area{padding:0 2px}.submit-button{position:relative;width:100%;height:56px;border:0;border-radius:28px;padding:0 54px;background:#deebca;color:#2c4027;font-weight:500;font-size:15px;cursor:pointer}
+.submit-button::after{content:'↗';position:absolute;right:8px;top:8px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#3c5033;font-size:25px;font-weight:400}
+.submit-button:disabled{opacity:.55;cursor:default}.submit-button.is-loading::after{content:'…'}
+.submit-note{font-size:10px;color:#92998d;text-align:center;margin:11px 0 0}
+.footer{display:flex;justify-content:space-between;padding:0 5px;margin-top:24px;color:#939b8c;font-size:10px}.footer strong{font-weight:500;letter-spacing:1px;color:#6d7b65}
+button:focus-visible,a:focus-visible{outline:2px solid #88ad3d;outline-offset:3px}
+    .error-message{display:none;padding:14px 17px;border-radius:17px;color:var(--error);background:#fbe8e1;border:1px solid #ebc5bc;font-size:12px;line-height:1.6;margin-bottom:12px}
+    .error-message.show{display:block}
+    .debug-info{display:none;white-space:pre-wrap;overflow:auto;max-height:160px;padding:12px;background:#fbfaf4;border:1px solid var(--line);border-radius:15px;font:11px/1.5 monospace;margin:0 0 12px}
+    .debug-info.show{display:block}
+    form.submitted input:invalid,form.submitted select:invalid{border-color:#c85543}
+    .success-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#f3f4ecf5;z-index:100;padding:24px}
+    .success-overlay.show{display:flex}
+    .success-message{width:100%;max-width:360px;background:var(--lime);border-radius:32px;padding:40px 25px;text-align:center}
+    .success-check{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:var(--ink);color:var(--lime);font-size:30px;margin:0 auto 25px}
+    .success-title{font-size:37px;line-height:1;font-weight:800;letter-spacing:-1.8px;margin-bottom:15px}
+    .success-subtitle{font-size:13px;line-height:1.6}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-        html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-        }
-
-        body {
-            font-family: 'Space Grotesk', -apple-system, sans-serif;
-            background: #F5F7F0;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px;
-        }
-
-        .container {
-            background: #FFFFFF;
-            border-radius: 32px;
-            padding: 40px 32px;
-            max-width: 480px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-            margin: 0 auto 40px;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .logo-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 8px;
-        }
-
-        .logo-badge {
-            font-size: 40px;
-        }
-
-        .logo h1 {
-            font-size: 48px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -2px;
-        }
-
-        .logo p {
-            color: #636E72;
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        .error-message {
-            background: rgba(255, 107, 107, 0.1);
-            border: 2px solid #FF6B6B;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
-            color: #FF6B6B;
-            font-weight: 600;
-            text-align: center;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .debug-info {
-            background: #F8F9FA;
-            border: 2px solid #E9ECEF;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 11px;
-            color: #636E72;
-            font-family: monospace;
-            max-height: 150px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .debug-info.show {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: #2D3436;
-            font-weight: 600;
-            font-size: 13px;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 16px;
-            background: #F8F9FA;
-            border: 2px solid #E9ECEF;
-            border-radius: 16px;
-            color: #2D3436;
-            font-size: 16px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 500;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            background: #FFFFFF;
-            border-color: #DCFF64;
-            box-shadow: 0 0 0 4px rgba(220, 255, 100, 0.2);
-        }
-
-        form.submitted input:invalid,
-        form.submitted select:invalid {
-            border-color: #FF6B6B;
-            background: rgba(255, 107, 107, 0.05);
-        }
-
-        select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%232D3436' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
-        }
-
-        .radio-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .radio-option input {
-            display: none;
-        }
-
-        .radio-option label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            background: #F8F9FA;
-            border: 2px solid #E9ECEF;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            color: #636E72;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .radio-option input:checked + label {
-            border-color: #DCFF64;
-            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
-            color: #2D3436;
-        }
-
-        .two-columns {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 12px !important;
-        }
-
-        .submit-button {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 24px;
-            box-shadow: 0 12px 32px rgba(45, 52, 54, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .submit-button.ready {
-            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
-            color: #2D3436;
-            box-shadow: 0 12px 32px rgba(220, 255, 100, 0.4);
-        }
-
-        .submit-button:active {
-            transform: scale(0.98);
-        }
-
-        .submit-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .submit-button.is-loading::before {
-            content: "";
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.35);
-            border-top-color: #FFFFFF;
-            border-radius: 50%;
-            animation: button-spin 0.7s linear infinite;
-        }
-
-        .submit-button.ready.is-loading::before {
-            border: 2px solid rgba(45, 52, 54, 0.25);
-            border-top-color: #2D3436;
-        }
-
-        @keyframes button-spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(245, 247, 240, 0.95);
-            z-index: 999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .success-overlay.show {
-            display: flex;
-        }
-
-        .success-message {
-            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
-            color: #2D3436;
-            padding: 48px;
-            border-radius: 32px;
-            text-align: center;
-        }
-
-        .success-title {
-            font-size: 32px;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 10px;
-        }
-
-        .success-subtitle {
-            font-size: 18px;
-            font-weight: 500;
-            color: #2D3436;
-            opacity: 0.85;
-        }
-
-        @media (max-width: 400px) {
-            .container {
-                padding: 32px 20px;
-            }
-            
-            .logo h1 {
-                font-size: 36px;
-            }
-            
-            input, select {
-                font-size: 15px;
-                padding: 14px;
-            }
-            
-            label {
-                font-size: 12px;
-            }
-        }
-    </style>
+@media(max-width:360px){body{padding:12px 10px 24px}.card{padding:18px}h1{font-size:23px}.card[aria-labelledby="about-heading"] .card-heading{gap:14px;margin-bottom:21px}.header-mascot{width:40px;height:88px;flex-basis:40px}.preferences{padding:4px 16px}.preference-card{grid-template-columns:18px minmax(0,1fr) minmax(105px,45%);gap:6px}.preference-card h2{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
-    <div class="success-overlay" id="overlay">
-        <div class="success-message">
-            <div class="success-title">Готово!</div>
-            <div class="success-subtitle">Продолжим в чате!</div>
-        </div>
-    </div>
+  <div class="success-overlay" id="overlay" role="status" aria-live="polite"><div class="success-message"><div class="success-check" aria-hidden="true">✓</div><div class="success-title">Отличный старт.</div><div class="success-subtitle">Профиль готов.<br>Продолжим в чате VILQA!</div></div></div>
+  <main class="container">
+    <div class="error-message" id="errorMessage" role="alert"></div><div class="debug-info" id="debugInfo"></div>
+    <form id="registrationForm">
+      <section class="card" aria-labelledby="about-heading"><div class="card-heading"><h1 id="about-heading">Давай рассчитаем твою дневную норму питания</h1><img class="header-mascot" src="assets/vilqa-mascot.svg" alt="Маскот VILQA"></div><div class="form-group name-field"><label class="field-label" for="name">Как тебя зовут?</label><input type="text" id="name" name="name" required maxlength="100" autocomplete="given-name" placeholder="Имя"></div><div class="two-columns identity-row"><div class="form-group"><span class="field-label" id="gender-label">Пол</span><div class="radio-group" role="radiogroup" aria-labelledby="gender-label"><div class="radio-option"><input type="radio" id="male" name="gender" value="male" required><label for="male" aria-label="Мужской" title="Мужской">М</label></div><div class="radio-option"><input type="radio" id="female" name="gender" value="female" required><label for="female" aria-label="Женский" title="Женский">Ж</label></div></div></div><div class="form-group"><label class="field-label" for="age">Возраст</label><div class="age-input"><input type="number" id="age" name="age" required placeholder="25" min="10" max="120" inputmode="numeric"><span class="input-unit">лет</span></div></div></div></section>
+      <section class="card metrics-card" aria-labelledby="metrics-heading"><div class="card-heading"><span class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 8a6 6 0 0 1 8 0M12 12l2-4"/><circle cx="12" cy="13" r="1"/></svg></span><h2 id="metrics-heading">Параметры</h2></div><div class="two-columns"><div class="form-group"><label class="field-label" for="height">Рост</label><div class="metric-input"><input type="number" id="height" name="height" required placeholder="170" min="100" max="250" inputmode="numeric"><span class="input-unit">см</span></div></div><div class="form-group"><label class="field-label" for="weight">Вес</label><div class="metric-input"><input type="number" id="weight" name="weight" required placeholder="65" min="30" max="300" step="0.1" inputmode="decimal"><span class="input-unit">кг</span></div></div></div></section>
+      <div class="preferences"><section class="card preference-card activity-card" aria-labelledby="activity-heading"><svg class="preference-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="m3 19 6-9 6 14 6-18 4 13h4"/></svg><h2 id="activity-heading">Активность</h2><p>Уровень ежедневной<br>нагрузки</p><label class="sr-only" for="activity">Уровень активности</label><select id="activity" name="activity" required><option value="">Выбрать</option><option value="1.2">Сидячий</option><option value="1.375">Минимальный</option><option value="1.55">Умеренный</option><option value="1.725">Высокий</option><option value="1.9">Очень высокий</option></select></section><section class="card preference-card goal-card" aria-labelledby="goal-heading"><svg class="preference-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="15" cy="17" r="11"/><circle cx="15" cy="17" r="5"/><path d="m15 17 13-13m-6 0h6v6"/></svg><h2 id="goal-heading">Цель</h2><p>Желаемый<br>результат</p><label class="sr-only" for="goal">Цель питания</label><select id="goal" name="goal" required><option value="">Выбрать</option><option value="lose">Снизить вес</option><option value="lose_fast">Быстро снизить</option><option value="maintain">Сохранить вес</option><option value="gain">Набрать массу</option><option value="gain_fast">Быстро набрать</option></select></section></div>
+      <input type="hidden" id="timezone" name="timezone" value="">
+      <div class="submit-area"><button type="submit" class="submit-button" id="submitButton">Собрать мой план</button><p class="submit-note">Параметры можно изменить в профиле.</p></div>
+    </form>
+    <footer class="footer"><strong>VILQA AI</strong><a href="https://t.me/vilqa_bot" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">@vilqa_bot</a></footer>
+  </main>
+  <script>
 
-    <div class="container">
-        <div class="logo">
-            <div class="logo-header">
-                <span class="logo-badge">🥗</span>
-                <h1>VILQA</h1>
-            </div>
-            <p>Начни заботиться о себе</p>
-        </div>
 
-        <div class="error-message" id="errorMessage"></div>
-        <div class="debug-info" id="debugInfo"></div>
 
-        <form id="registrationForm">
-            <div class="form-group">
-                <label for="name">Имя</label>
-                <input type="text" id="name" name="name" required placeholder="Введите имя">
-            </div>
 
-            <div class="two-columns">
-                <div class="form-group">
-                    <label>Пол</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="male" name="gender" value="male" required>
-                            <label for="male">👨</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="female" name="gender" value="female" required>
-                            <label for="female">👩</label>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="age">Возраст</label>
-                    <input type="number" id="age" name="age" required placeholder="18" min="10" max="120">
-                </div>
-            </div>
 
-            <div class="two-columns">
-                <div class="form-group">
-                    <label for="height">Рост, см</label>
-                    <input type="number" id="height" name="height" required placeholder="170" min="100" max="250">
-                </div>
 
-                <div class="form-group">
-                    <label for="weight">Вес, кг</label>
-                    <input type="number" id="weight" name="weight" required placeholder="70" min="30" max="300" step="0.1">
-                </div>
-            </div>
 
-            <div class="form-group">
-                <label for="activity">Активность</label>
-                <select id="activity" name="activity" required>
-                    <option value="">Выберите уровень активности</option>
-                    <option value="1.2">🪑 Сидячий</option>
-                    <option value="1.375">🚶 Минимальная</option>
-                    <option value="1.55">🏃 Умеренная</option>
-                    <option value="1.725">💪 Высокая</option>
-                    <option value="1.9">🏋️ Очень высокая</option>
-                </select>
-            </div>
 
-            <div class="form-group">
-                <label for="goal">Цель</label>
-                <select id="goal" name="goal" required>
-                    <option value="">Выберите вашу цель</option>
-                    <option value="lose">⬇️ Похудеть</option>
-                    <option value="lose_fast">⬇️⬇️ Быстро похудеть</option>
-                    <option value="maintain">➡️ Держать вес</option>
-                    <option value="gain">⬆️ Набрать массу</option>
-                    <option value="gain_fast">⬆️⬆️ Быстро набрать</option>
-                </select>
-            </div>
 
-            <!-- Скрытое поле для определения timezone -->
-            <input type="hidden" id="timezone" name="timezone" value="">
 
-            <button type="submit" class="submit-button" id="submitButton">
-                Начать путь 🚀
-            </button>
-        </form>
-    </div>
 
-    <script>
+
+
+
+
+
+
+
+
         // Debug helper: в проде выключен по умолчанию, можно включить ?debug=1
         const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
 
@@ -482,7 +174,7 @@
             const form = document.getElementById('registrationForm');
             const submitButton = document.getElementById('submitButton');
             const errorMessage = document.getElementById('errorMessage');
-            const submitDefaultText = 'Начать путь 🚀';
+            const submitDefaultText = 'Собрать мой план';
 
             let isSubmitting = false;
 
@@ -663,6 +355,26 @@
 
             addDebug('✅ Инициализация завершена');
         });
-    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
 </body>
 </html>
