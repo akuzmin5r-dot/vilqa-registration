@@ -417,7 +417,7 @@
                 return;
             }
             const timestamp = new Date().toLocaleTimeString();
-            debugDiv.innerHTML += `[${timestamp}] ${msg}\n`;
+            debugDiv.textContent += `[${timestamp}] ${msg}\n`;
             debugDiv.classList.add('show');
             console.log(msg);
         }
@@ -434,7 +434,7 @@
             } catch (e) {
                 // Fallback для старых браузеров
                 const offset = -new Date().getTimezoneOffset() / 60;
-                document.getElementById('timezone').value = `UTC${offset >= 0 ? '+' : ''}${offset}`;
+                document.getElementById('timezone').value = 'UTC';
                 addDebug('Timezone: UTC' + offset + ' (fallback по offset)');
             }
 
@@ -484,7 +484,10 @@
             const errorMessage = document.getElementById('errorMessage');
             const submitDefaultText = 'Начать путь 🚀';
 
+            let isSubmitting = false;
+
             function setSubmitLoading(isLoading) {
+                isSubmitting = isLoading;
                 submitButton.disabled = isLoading;
                 submitButton.classList.toggle('is-loading', isLoading);
                 submitButton.textContent = isLoading ? 'Отправка...' : submitDefaultText;
@@ -550,6 +553,7 @@
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                if (isSubmitting) return;
                 form.classList.add('submitted');
 
                 // Улучшенная валидация с конкретными сообщениями
@@ -594,6 +598,8 @@
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData);
                 Object.assign(data, telegramData);
+                data.initData = tg.initData || '';
+                data.name = String(data.name || '').trim();
 
                 // Проверка наличия gender перед отправкой
                 if (!data.gender || (data.gender !== 'male' && data.gender !== 'female')) {
@@ -636,25 +642,14 @@
                     });
 
                     addDebug(`Response status: ${response.status} ${response.statusText}`);
-                    if (!response.ok) {
-                        let responseBody = '';
-                        try {
-                            responseBody = await response.text();
-                        } catch (e) {
-                            addDebug('Не удалось прочитать тело ошибки: ' + e.message);
-                        }
-                        throw new Error(`Server error ${response.status}: ${responseBody || 'empty response'}`);
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch {
+                        throw new Error('Не удалось получить подтверждение регистрации. Попробуйте ещё раз.');
                     }
-
-                    addDebug('✅ Успешная отправка!');
-
-                    // В debug-режиме читаем ответ асинхронно, не блокируя UI.
-                    if (DEBUG_MODE) {
-                        response.clone().text().then((raw) => {
-                            addDebug(`Response body (raw): ${raw || '[empty]'}`);
-                        }).catch((err) => {
-                            addDebug(`Ошибка чтения debug-ответа: ${err.message}`);
-                        });
+                    if (!response.ok || result?.success !== true) {
+                        throw new Error(result?.message || 'Регистрация не сохранена. Попробуйте ещё раз.');
                     }
 
                     finishSuccess();
