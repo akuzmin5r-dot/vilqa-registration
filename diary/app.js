@@ -33,7 +33,7 @@ async function api(data,options={}){
    return result;
   }catch(error){if(options.signal?.aborted)throw new DOMException('Cancelled','AbortError');last=error;if(error.status||attempt===1)break;}finally{clearTimeout(timeout);options.signal?.removeEventListener('abort',abort);}
  }
- if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
+ if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit','access_grant','access_revoke'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
  throw last;
 }
 function target(){return state.user!==null?{user_id:state.user}:{};}
@@ -79,7 +79,7 @@ async function loadDay(options={}){
   if(options.debounce){await new Promise(resolve=>setTimeout(resolve,100));if(id!==state.loadId)return;}
   const result=await api({action:'day',...(state.date?{date:state.date}:{}),...target(),include_deleted:deleted},{signal:controller.signal});
   acceptDay(result,id,epoch,deleted);
- }catch(error){if(id!==state.loadId||error.name==='AbortError')return;notify(errorMessage(error));content.innerHTML='<div class="empty"><h3>Не удалось загрузить день</h3><p>Проверь соединение и попробуй ещё раз</p><button class="text-button" id="retryLoad">Повторить загрузку</button></div>';$('#retryLoad').addEventListener('click',()=>loadDay({force:true}));}
+ }catch(error){if(id!==state.loadId||error.name==='AbortError')return;notify(errorMessage(error));if(error.status===403){content.innerHTML='<div class="empty"><h3>Доступ по приглашению</h3><p>Чтобы пользоваться VILQA, напиши в поддержку</p><a href="https://t.me/vilqa_support_bot" target="_blank" rel="noopener noreferrer">Получить доступ</a></div>';}else{content.innerHTML='<div class="empty"><h3>Не удалось загрузить день</h3><p>Проверь соединение и попробуй ещё раз</p><button class="text-button" id="retryLoad">Повторить загрузку</button></div>';$('#retryLoad').addEventListener('click',()=>loadDay({force:true}));}}
  finally{if(id===state.loadId){content.removeAttribute('aria-busy');dateBar.classList.remove('is-loading');$('#initialLoader').hidden=true;document.body.classList.remove('booting');$('#dayView').hidden=!['day','admin'].includes(state.tab);}}
 }
 function changeDay(offset){
@@ -97,7 +97,7 @@ async function showTab(tab){
  try{
   if(tab==='admin'){
    if(!state.admin)throw new Error('Нет доступа к админке');const result=await api({action:'users'});
-   $('#userSelect').innerHTML=result.users.map(u=>`<option value="${Number(u.user_id)}">${esc(u.name||u.username||u.user_id)}${u.username?' · @'+esc(u.username):''}</option>`).join('');$('#userSelect').value=String(state.user);
+   $('#userSelect').innerHTML=result.users.map(u=>`<option value="${Number(u.user_id)}">${esc(u.name||u.username||u.user_id)}${u.username?' · @'+esc(u.username):''}</option>`).join('');$('#userSelect').value=String(state.user);await loadAccessAccounts();
   }else if(tab==='history'){
    $('#historyDays').innerHTML='<div class="skeleton"></div>';const result=await api({action:'history',date:state.date,...target()});
    $('#historyDays').innerHTML=result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${Number(day.count)} записей · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${fmt(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>';
@@ -170,3 +170,38 @@ function setupTelegram(){const app=telegram();app?.ready();app?.expand();app?.on
 $('#telegramSdk')?.addEventListener('load',setupTelegram,{once:true});setupTelegram();
 document.addEventListener('visibilitychange',()=>{if(document.hidden){prefetchRead?.abort();clearTimeout(prefetchTimer);}else if(state.actor&&!state.busy)loadDay({force:true});});
 installIcons();if(local)$('#demoNote').hidden=false;loadDay().then(()=>{if(launchParams.get('tab')==='profile'&&state.actor)showTab('profile');});
+
+// Membership administration is checked again by the authenticated server API.
+let accessCandidate=null,accessBusy=false;
+function accessError(message){$('#accessError').textContent=message||'';$('#accessError').hidden=!message;}
+function accountCaption(a){return esc(a.name||a.username||'Telegram-аккаунт')+(a.username?' <small>@'+esc(a.username)+'</small>':'')+'<small>ID '+Number(a.user_id)+'</small>';}
+async function loadAccessAccounts(){
+ if(!state.admin)return;
+ const result=await api({action:'access_list'});
+ const active=result.accounts.filter(a=>a.active),waiting=result.accounts.filter(a=>!a.active);
+ const row=a=>'<div class="access-account"><div>'+accountCaption(a)+'</div>'+(a.is_owner?'<span class="access-owner">Владелец</span>':a.active?'<button class="text-button danger" data-access-revoke="'+Number(a.user_id)+'" data-access-name="'+esc(a.username||a.name||a.user_id)+'">Отключить</button>':a.username?'<button class="text-button" data-access-lookup="'+esc(a.username)+'">Выбрать</button>':'<span class="access-owner">Нет @ника</span>')+'</div>';
+ $('#accessAccounts').innerHTML='<h3>Есть доступ · '+active.length+'</h3>'+active.map(row).join('')+(waiting.length?'<h3>Открывали бота · '+waiting.length+'</h3>'+waiting.map(row).join(''):'');
+}
+async function findAccessAccount(username){
+ if(accessBusy||state.busy)return;accessBusy=true;$('#accessFind').disabled=true;accessCandidate=null;$('#accessCandidate').replaceChildren();accessError('');
+ try{const result=await api({action:'access_lookup',username:username.trim()});accessCandidate=result.account;$('#accessCandidate').innerHTML='<div class="access-found"><div>'+accountCaption(result.account)+'</div>'+(result.account.active?'<p>Уже есть доступ</p>':'<button type="button" class="primary" id="grantAccess">Открыть доступ</button>')+'</div>';}
+ catch(error){accessError(errorMessage(error));}
+ finally{accessBusy=false;$('#accessFind').disabled=false;}
+}
+$('#accessLookupForm').addEventListener('submit',e=>{e.preventDefault();if(state.admin)findAccessAccount($('#accessUsername').value);});
+$('#accessCandidate').addEventListener('click',async e=>{
+ if(!e.target.closest('#grantAccess')||!accessCandidate||accessBusy||state.busy||!state.admin)return;
+ const account={...accessCandidate};accessBusy=true;state.busy=true;e.target.disabled=true;accessError('');
+ try{const result=await api({action:'access_grant',username:account.username,resolved_user_id:Number(account.user_id),identity_version:Number(account.identity_version),request_id:crypto.randomUUID()});$('#accessCandidate').replaceChildren();accessCandidate=null;invalidateDays();await loadAccessAccounts();notify(result.message,true);}
+ catch(error){accessError(errorMessage(error));}
+ finally{accessBusy=false;state.busy=false;const button=$('#grantAccess');if(button)button.disabled=false;}
+});
+$('#accessAccounts').addEventListener('click',async e=>{
+ const lookup=e.target.closest('[data-access-lookup]');if(lookup){$('#accessUsername').value='@'+lookup.dataset.accessLookup;await findAccessAccount(lookup.dataset.accessLookup);return;}
+ const button=e.target.closest('[data-access-revoke]');if(!button||accessBusy||state.busy||!state.admin)return;
+ const uid=Number(button.dataset.accessRevoke);if(!await ask('Отключить доступ?','@'+button.dataset.accessName+' больше не сможет пользоваться ботом и дневником. Сохранённые записи останутся.','Отключить'))return;
+ accessBusy=true;state.busy=true;button.disabled=true;accessError('');
+ try{const result=await api({action:'access_revoke',resolved_user_id:uid,request_id:crypto.randomUUID()});invalidateDays();if(state.user===uid)state.user=state.actor;accessCandidate=null;$('#accessCandidate').replaceChildren();await loadAccessAccounts();const users=await api({action:'users'});$('#userSelect').innerHTML=users.users.map(u=>'<option value="'+Number(u.user_id)+'">'+esc(u.name||u.username||u.user_id)+'</option>').join('');$('#userSelect').value=String(state.user);await loadDay({force:true});notify(result.message,true);}
+ catch(error){accessError(errorMessage(error));}
+ finally{accessBusy=false;state.busy=false;button.disabled=false;}
+});
