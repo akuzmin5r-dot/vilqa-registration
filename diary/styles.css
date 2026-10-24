@@ -11,3 +11,5 @@
 .entry-link-target{box-shadow:0 0 0 2px #aec68d;background:#fbfdf7}
 
 .field select{display:block;width:100%;background:#f5f7f2;border:1px solid #e3e8dc;border-radius:12px;min-height:48px;padding:12px;margin-top:7px;font-size:15px;color:#2e3929}.profile-edit-button{margin-top:20px}.profile-history-button{margin:9px auto 0}.admin-bar #adminProfile{background:#ffffff80;margin-top:10px;width:100%;justify-content:center}
+
+.app-header{padding-bottom:22px}.summary{isolation:isolate}.summary::before{content:'';position:absolute;z-index:0;pointer-events:none;right:15px;top:20px;width:112px;height:130px;background:url('../assets/vilqa-mascot.svg?v=original-1') center/contain no-repeat;opacity:.13;transform:rotate(7deg);-webkit-mask-image:linear-gradient(to right,transparent,#000 30%);mask-image:linear-gradient(to right,transparent,#000 30%)}.summary>*{position:relative;z-index:1}.summary>.progress-track{z-index:2}.summary .day-badge{background:#f8fbf6d9}@media(max-width:360px){.summary::before{right:11px;top:24px;width:94px;height:118px}}
