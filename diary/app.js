@@ -4,26 +4,36 @@ const icon=name=>`<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||pat
 const $=selector=>document.querySelector(selector);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(Number(n)||0);
-const tg=window.Telegram?.WebApp;
+const telegram=()=>window.Telegram?.WebApp;
+const initialData=()=>telegram()?.initData||new URLSearchParams(location.hash.slice(1)).get('tgWebAppData')||'';
 const local=['127.0.0.1','localhost'].includes(location.hostname);
 const endpoint=local?'/__diary/api':'https://n8n.svoidigital.ru/webhook/vilqa-diary';
-const state={date:'',actor:null,user:null,admin:false,adminMode:false,profile:null,entries:[],deleted:false,tab:'day',editing:null,busy:false,loadId:0};
+const launchParams=new URLSearchParams(location.search);
+const launchDate=launchParams.get('date')||'';
+const validLaunchDate=/^\d{4}-\d{2}-\d{2}$/.test(launchDate)&&!Number.isNaN(Date.parse(launchDate+'T12:00:00'))&&new Date(launchDate+'T12:00:00Z').toISOString().slice(0,10)===launchDate;
+const state={date:validLaunchDate?launchDate:'',actor:null,user:null,admin:false,adminMode:false,profile:null,entries:[],deleted:launchParams.get('deleted')==='1',focusEntry:Number(launchParams.get('entry'))||null,tab:'day',editing:null,busy:false,loadId:0};
 function installIcons(root=document){root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});}
 function notify(text,success=false){const el=$('#message');el.textContent=text;el.classList.toggle('success',success);el.hidden=false;}
 function errorMessage(error){return error?.message||'Не удалось загрузить дневник. Попробуй ещё раз.';}
-async function api(data){
- if(!tg?.initData&&!local)throw new Error('Открой дневник через кнопку в @vilqa_bot');
+async function waitForTelegram(){
+ if(local||initialData()||telegram())return;
+ await new Promise(resolve=>{const script=$('#telegramSdk');let timer;const done=()=>{clearTimeout(timer);script?.removeEventListener('load',done);script?.removeEventListener('error',done);resolve();};script?.addEventListener('load',done,{once:true});script?.addEventListener('error',done,{once:true});timer=setTimeout(done,8000);});
+}
+async function api(data,options={}){
+ await waitForTelegram();
+ if(!initialData()&&!local)throw new Error('Открой дневник через кнопку в @vilqa_bot');
  let last;
  for(let attempt=0;attempt<2;attempt++){
-  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),18000);
+  if(options.signal?.aborted)throw new DOMException('Cancelled','AbortError');
+  const controller=new AbortController();const abort=()=>controller.abort();options.signal?.addEventListener('abort',abort,{once:true});const timeout=setTimeout(abort,options.timeout||12000);
   try{
-   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:controller.signal,body:JSON.stringify({...data,initData:tg?.initData||''})});
+   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:controller.signal,body:JSON.stringify({...data,initData:initialData()})});
    const result=await response.json();
    if(!response.ok||result.success!==true){const error=new Error(result.message||'Не удалось выполнить запрос');error.status=response.status;throw error;}
    return result;
-  }catch(error){last=error;if(error.status||attempt===1)break;}finally{clearTimeout(timeout);}
+  }catch(error){if(options.signal?.aborted)throw new DOMException('Cancelled','AbortError');last=error;if(error.status||attempt===1)break;}finally{clearTimeout(timeout);options.signal?.removeEventListener('abort',abort);}
  }
- if(last?.name==='AbortError'||last instanceof TypeError)throw new Error('Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.');
+ if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
  throw last;
 }
 function target(){return state.user!==null?{user_id:state.user}:{};}
@@ -36,15 +46,47 @@ function renderDay(data){
  $('#dayContent').innerHTML=`<section class="summary" aria-label="Прогресс за день"><div class="summary-top"><span>Калории за день</span><span class="day-badge">${Number(totals.count)||0} записей</span></div><div class="calorie-value"><strong>${fmt(totals.calories)}</strong><span>${goal?'/ '+fmt(goal):''} ккал</span></div><p class="remaining">${goal?(remaining>=0?'Осталось '+fmt(remaining)+' ккал':'Выше ориентира на '+fmt(-remaining)+' ккал'):'Дневной ориентир пока не задан'}</p><div class="progress-track"><span style="width:${progress(totals.calories,goal)}%"></span></div></section><div class="macro-grid">${macro('Белки','protein')}${macro('Жиры','fats')}${macro('Углеводы','carbs')}</div><div class="section-heading"><h2>Записи за день</h2><span>${data.entries.filter(x=>!x.deleted_at).length} в дневнике</span></div>${data.entries.length?data.entries.map(entryCard).join(''):`<div class="empty">${icon('bowl')}<h3>Здесь пока пусто</h3><p>Добавь еду текстом или голосом в чате с VILQA</p><a href="https://t.me/vilqa_bot">Перейти в бот</a></div>`}<label class="deleted-toggle"><input type="checkbox" id="showDeleted" ${state.deleted?'checked':''}>Показать удалённые записи</label>`;
  $('#showDeleted').addEventListener('change',e=>{state.deleted=e.target.checked;loadDay();});
 }
-async function loadDay(){
- const id=++state.loadId;$('#dayContent').setAttribute('aria-busy','true');
- try{
-  const result=await api({action:'day',...(state.date?{date:state.date}:{}),...target(),include_deleted:state.deleted});if(id!==state.loadId)return;
-  state.actor=result.actor_id;state.user=result.user_id;state.date=result.date;state.admin=result.is_admin;state.profile=result.profile||{};state.entries=result.entries||[];
-  $('#dateInput').value=state.date;$('#dateLabel').textContent=dateTitle(state.date);$('#adminTab').hidden=!state.admin;renderDay(result);
- }catch(error){if(id!==state.loadId)return;notify(errorMessage(error));$('#dayContent').innerHTML='<div class="empty"><h3>Дневник недоступен</h3><p>Проверь соединение и открой приложение заново</p><button class="text-button" id="retryLoad">Повторить загрузку</button></div>';$('#retryLoad').addEventListener('click',loadDay);}finally{if(id===state.loadId)$('#dayContent').removeAttribute('aria-busy');}
+const dayCache=new Map();let cacheEpoch=0,foregroundRead=null,prefetchRead=null,prefetchTimer=null;
+function dayKey(user,date,deleted){return String(user)+'|'+date+'|'+Boolean(deleted);}
+function cachedDay(user,date,deleted){const value=dayCache.get(dayKey(user,date,deleted));return value&&Date.now()-value.at<30000?value.data:null;}
+function rememberDay(data,deleted,epoch){if(epoch!==cacheEpoch)return;dayCache.set(dayKey(data.user_id,data.date,deleted),{data,at:Date.now()});while(dayCache.size>20)dayCache.delete(dayCache.keys().next().value);}
+function invalidateDays(){cacheEpoch++;dayCache.clear();prefetchRead?.abort();clearTimeout(prefetchTimer);}
+function offsetDate(date,offset){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+offset);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
+function syncDateLabel(){if(!state.date)return;$('#dateInput').value=state.date;$('#dateLabel').textContent=dateTitle(state.date);}
+function prefetchDays(data){
+ clearTimeout(prefetchTimer);prefetchRead?.abort();const epoch=cacheEpoch,deleted=state.deleted;
+ prefetchTimer=setTimeout(()=>{if(state.busy||state.tab==='history'||document.hidden)return;const controller=new AbortController();prefetchRead=controller;
+  for(const offset of [-1,1]){const date=offsetDate(data.date,offset);if(cachedDay(data.user_id,date,deleted))continue;
+   api({action:'day',date,user_id:data.user_id,include_deleted:deleted},{signal:controller.signal,timeout:8000}).then(result=>rememberDay(result,deleted,epoch)).catch(()=>{});
+  }
+ },250);
 }
-function changeDay(offset){if(state.busy)return;const d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+offset);state.date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');loadDay();}
+function acceptDay(result,id,epoch,deleted){
+ if(id!==state.loadId||epoch!==cacheEpoch)return;
+ state.actor=result.actor_id;state.user=result.user_id;state.date=result.date;state.admin=result.is_admin;state.profile=result.profile||{};state.entries=result.entries||[];
+ syncDateLabel();$('#adminTab').hidden=!state.admin;rememberDay(result,deleted,epoch);renderDay(result);
+ if(state.focusEntry){const selected=$('[data-entry="'+state.focusEntry+'"]');if(selected){state.focusEntry=null;selected.classList.add('entry-link-target');requestAnimationFrame(()=>selected.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));}}
+ const content=$('#dayContent');content.classList.remove('day-enter');void content.offsetWidth;content.classList.add('day-enter');prefetchDays(result);
+}
+async function loadDay(options={}){
+ const id=++state.loadId,epoch=cacheEpoch,deleted=state.deleted;foregroundRead?.abort();prefetchRead?.abort();clearTimeout(prefetchTimer);syncDateLabel();
+ const content=$('#dayContent'),dateBar=$('.date-bar');const cached=!options.force&&state.date?cachedDay(state.user,state.date,deleted):null;
+ if(cached){acceptDay(cached,id,epoch,deleted);content.removeAttribute('aria-busy');dateBar.classList.remove('is-loading');return;}
+ state.entries=[];content.setAttribute('aria-busy','true');dateBar.classList.add('is-loading');
+ if(state.actor){content.innerHTML='<div class="day-loading" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-8-8"/></svg><span>Загружаем записи за выбранный день</span></div><div class="skeleton"></div><div class="skeleton small"></div>';}
+ const controller=new AbortController();foregroundRead=controller;
+ try{
+  if(options.debounce){await new Promise(resolve=>setTimeout(resolve,100));if(id!==state.loadId)return;}
+  const result=await api({action:'day',...(state.date?{date:state.date}:{}),...target(),include_deleted:deleted},{signal:controller.signal});
+  acceptDay(result,id,epoch,deleted);
+ }catch(error){if(id!==state.loadId||error.name==='AbortError')return;notify(errorMessage(error));content.innerHTML='<div class="empty"><h3>Не удалось загрузить день</h3><p>Проверь соединение и попробуй ещё раз</p><button class="text-button" id="retryLoad">Повторить загрузку</button></div>';$('#retryLoad').addEventListener('click',()=>loadDay({force:true}));}
+ finally{if(id===state.loadId){content.removeAttribute('aria-busy');dateBar.classList.remove('is-loading');$('#initialLoader').hidden=true;document.body.classList.remove('booting');$('#dayView').hidden=!['day','admin'].includes(state.tab);}}
+}
+function changeDay(offset){
+ if(state.busy||!state.date)return;state.date=offsetDate(state.date,offset);const button=$(offset<0?'#prevDay':'#nextDay');
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches)button.animate?.([{transform:'translateX(0) scale(1)'},{transform:'translateX('+(offset*4)+'px) scale(.92)'},{transform:'translateX(0) scale(1)'}],{duration:190,easing:'ease-out'});
+ loadDay({debounce:true});
+}
 async function showTab(tab){
  if(state.busy)return;state.tab=tab;state.adminMode=tab==='admin';
  if(!state.adminMode&&state.actor&&state.user!==state.actor){state.user=state.actor;await loadDay();}
@@ -69,9 +111,9 @@ function openEdit(row){
 }
 function ask(title,text,label){return new Promise(resolve=>{const dialog=$('#confirmDialog');$('#confirmTitle').textContent=title;$('#confirmText').textContent=text;$('#acceptConfirm').textContent=label;let accepted=false;const close=()=>{dialog.removeEventListener('close',close);resolve(accepted);};dialog.addEventListener('close',close);$('#acceptConfirm').onclick=()=>{accepted=true;dialog.close();};$('#cancelConfirm').onclick=()=>dialog.close();dialog.showModal();});}
 async function mutate(action,row,extra={}){
- if(state.busy)return null;state.busy=true;document.querySelectorAll('button').forEach(el=>el.disabled=true);
+ if(state.busy)return null;invalidateDays();state.busy=true;document.querySelectorAll('button').forEach(el=>el.disabled=true);
  try{return await api({action,id:row.id,version:row.version,user_id:row.user_id,request_id:crypto.randomUUID(),...extra});}
- finally{state.busy=false;document.querySelectorAll('button').forEach(el=>el.disabled=false);}
+ finally{invalidateDays();state.busy=false;document.querySelectorAll('button').forEach(el=>el.disabled=false);}
 }
 async function destructive(action,row){
  const restore=action==='restore';if(!await ask(restore?'Восстановить запись?':'Удалить запись?',restore?'Запись снова появится в дневнике и войдёт в итог дня.':'Она исчезнет из итогов, но останется в истории. Удаление можно отменить.',restore?'Восстановить':'Удалить'))return;
@@ -94,4 +136,7 @@ $('#userSelect').addEventListener('change',event=>{state.user=Number(event.targe
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.tab)));
 document.querySelectorAll('.close-dialog').forEach(el=>el.addEventListener('click',()=>{if(!state.busy)el.closest('dialog').close();}));
 document.querySelectorAll('dialog').forEach(el=>el.addEventListener('cancel',event=>{if(state.busy)event.preventDefault();}));
-installIcons();tg?.ready();tg?.expand();if(local)$('#demoNote').hidden=false;loadDay();
+function setupTelegram(){const app=telegram();app?.ready();app?.expand();app?.onEvent?.('activated',()=>{if(state.actor&&!state.busy)loadDay({force:true});});}
+$('#telegramSdk')?.addEventListener('load',setupTelegram,{once:true});setupTelegram();
+document.addEventListener('visibilitychange',()=>{if(document.hidden){prefetchRead?.abort();clearTimeout(prefetchTimer);}else if(state.actor&&!state.busy)loadDay({force:true});});
+installIcons();if(local)$('#demoNote').hidden=false;loadDay();
