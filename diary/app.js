@@ -33,7 +33,7 @@ async function api(data,options={}){
    return result;
   }catch(error){if(options.signal?.aborted)throw new DOMException('Cancelled','AbortError');last=error;if(error.status||attempt===1)break;}finally{clearTimeout(timeout);options.signal?.removeEventListener('abort',abort);}
  }
- if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
+ if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
  throw last;
 }
 function target(){return state.user!==null?{user_id:state.user}:{};}
@@ -88,11 +88,12 @@ function changeDay(offset){
  loadDay({debounce:true});
 }
 async function showTab(tab){
- if(state.busy)return;state.tab=tab;state.adminMode=tab==='admin';
+ if(state.busy)return;state.tab=tab;state.adminMode=['admin','admin-profile'].includes(tab);
  if(!state.adminMode&&state.actor&&state.user!==state.actor){state.user=state.actor;await loadDay();}
- $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=tab!=='profile';$('#adminBar').hidden=!state.adminMode;
- $('#pageTitle').textContent=({day:'Дневник питания',history:'История питания',profile:'Профиль',admin:'Админка'})[tab];
- document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
+ $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=!['profile','admin-profile'].includes(tab);$('#adminBar').hidden=!state.adminMode;
+ $('#adminProfile').textContent=tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
+ $('#pageTitle').textContent=({day:'Дневник питания',history:'История питания',profile:'Профиль',admin:'Админка','admin-profile':'Профиль пользователя'})[tab];
+ document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===(tab==='admin-profile'?'admin':tab)));
  try{
   if(tab==='admin'){
    if(!state.admin)throw new Error('Нет доступа к админке');const result=await api({action:'users'});
@@ -100,9 +101,8 @@ async function showTab(tab){
   }else if(tab==='history'){
    $('#historyDays').innerHTML='<div class="skeleton"></div>';const result=await api({action:'history',date:state.date,...target()});
    $('#historyDays').innerHTML=result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${Number(day.count)} записей · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${fmt(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>';
-  }else if(tab==='profile'){
-   const p=state.profile;const line=(label,value)=>`<div class="profile-line"><span>${label}</span><strong>${esc(value??'—')}</strong></div>`;
-   $('#profileContent').innerHTML=`<div class="profile-card"><h2>${esc(p.name||'Профиль питания')}</h2>${line('Цель',p.goal_ru)}${line('Возраст',p.age?fmt(p.age)+' лет':null)}${line('Рост',p.height?fmt(p.height)+' см':null)}${line('Вес',p.weight?fmt(p.weight)+' кг':null)}${line('Калории',p.daily_calories?fmt(p.daily_calories)+' ккал':null)}${line('Часовой пояс',p.timezone)}<p class="profile-note">Параметры и цель можно изменить через повторную регистрацию в боте.</p></div>`;
+  }else if(['profile','admin-profile'].includes(tab)){
+   await renderProfile();
   }
  }catch(error){notify(errorMessage(error));}
 }
@@ -132,11 +132,41 @@ $('#dayContent').addEventListener('click',event=>{const button=event.target.clos
 $('#auditContent').addEventListener('click',async event=>{const button=event.target.closest('[data-revert]');if(!button)return;const row=state.entries.find(r=>r.id===Number(button.dataset.entryId));if(!row)return;$('#auditDialog').close();if(!await ask('Вернуть прежние значения?','Текущие значения тоже сохранятся в истории.','Вернуть'))return;try{await mutate('revert',row,{audit_id:Number(button.dataset.revert)});await loadDay();notify('Прежние значения восстановлены',true);}catch(error){notify(errorMessage(error));await loadDay();}});
 $('#historyDays').addEventListener('click',event=>{const el=event.target.closest('[data-date]');if(!el)return;state.date=el.dataset.date;showTab('day');loadDay();});
 $('#prevDay').addEventListener('click',()=>changeDay(-1));$('#nextDay').addEventListener('click',()=>changeDay(1));$('#dateInput').addEventListener('change',event=>{if(event.target.value){state.date=event.target.value;loadDay();}});
-$('#userSelect').addEventListener('change',event=>{state.user=Number(event.target.value);if(state.user===0)notify('Старые записи без владельца и даты показаны все вместе. Они не входят в дневники пользователей.');loadDay();});
+$('#userSelect').addEventListener('change',async event=>{state.user=Number(event.target.value);state.profile=null;if(state.user===0)notify('Старые записи без владельца и даты показаны все вместе. Они не входят в дневники пользователей.');await loadDay({force:true});if(state.tab==='admin-profile')await renderProfile();});
+$('#adminProfile').addEventListener('click',()=>showTab(state.tab==='admin-profile'?'admin':'admin-profile'));
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.tab)));
 document.querySelectorAll('.close-dialog').forEach(el=>el.addEventListener('click',()=>{if(!state.busy)el.closest('dialog').close();}));
 document.querySelectorAll('dialog').forEach(el=>el.addEventListener('cancel',event=>{if(state.busy)event.preventDefault();}));
+
+async function renderProfile(){
+ const user=state.user;$('#profileContent').innerHTML='<div class="skeleton"></div>';
+ const result=await api({action:'profile',...target()});if(user!==state.user)return;state.profile=result.profile||{};
+ const p=state.profile;const line=(label,value)=>'<div class="profile-line"><span>'+label+'</span><strong>'+esc(value??'—')+'</strong></div>';
+ $('#profileContent').innerHTML='<div class="profile-card"><h2>'+esc(p.name||'Профиль питания')+'</h2>'+line('Цель',p.goal_ru)+line('Пол',p.gender==='male'?'Мужской':p.gender==='female'?'Женский':null)+line('Возраст',p.age?fmt(p.age)+' лет':null)+line('Рост',p.height?fmt(p.height)+' см':null)+line('Вес',p.weight?fmt(p.weight)+' кг':null)+line('Калории',p.daily_calories?fmt(p.daily_calories)+' ккал':null)+line('Активность',activityName(p.activity_level))+line('Часовой пояс',p.timezone)+(state.user>0?'<button class="primary profile-edit-button" id="openProfileEdit">'+icon('edit')+'Изменить параметры</button><button class="text-button profile-history-button" id="openProfileHistory">'+icon('history')+'История изменений</button>':'')+'<p class="profile-note">Новый ориентир действует после сохранения. Записи питания остаются на месте.</p></div>';
+ $('#openProfileEdit')?.addEventListener('click',openProfileEdit);$('#openProfileHistory')?.addEventListener('click',openProfileHistory);
+ $('#adminProfile').textContent=state.tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
+}
+function activityName(value){return ({'1.2':'Сидячая','1.375':'Низкая','1.55':'Умеренная','1.725':'Высокая','1.9':'Очень высокая'})[String(Number(value))]||'—';}
+function openProfileEdit(){
+ const p=state.profile,f=$('#profileForm');state.editingProfile={user_id:state.user,version:p.profile_version||0};
+ for(const key of ['name','gender','age','height','weight','goal'])f.elements[key].value=p[key]??'';
+ f.elements.activity.value=String(Number(p.activity_level));$('#profileError').hidden=true;$('#profileDialog').showModal();
+}
+$('#profileForm').addEventListener('submit',async event=>{
+ event.preventDefault();if(state.busy)return;const f=event.currentTarget,patch={name:f.elements.name.value.trim(),gender:f.elements.gender.value,goal:f.elements.goal.value};
+ for(const key of ['age','height','weight','activity'])patch[key]=Number(f.elements[key].value);
+ invalidateDays();state.busy=true;$('#saveProfile').disabled=true;$('#saveProfile').textContent='Сохраняем…';$('#profileError').hidden=true;
+ try{await api({action:'profile_edit',user_id:state.editingProfile.user_id,version:state.editingProfile.version,request_id:crypto.randomUUID(),patch});invalidateDays();$('#profileDialog').close();await loadDay({force:true});await renderProfile();notify('Профиль сохранён, дневная норма пересчитана',true);}
+ catch(error){$('#profileError').textContent=errorMessage(error);$('#profileError').hidden=false;}
+ finally{state.busy=false;$('#saveProfile').disabled=false;$('#saveProfile').textContent='Сохранить и пересчитать';}
+});
+async function openProfileHistory(){
+ $('#auditContent').innerHTML='<div class="skeleton"></div>';$('#auditDialog').showModal();
+ try{const result=await api({action:'profile_history',...target()});$('#auditContent').innerHTML=result.events.length?result.events.map(e=>'<article class="audit-event"><h3>'+(e.action==='registration'?'Регистрация':'Профиль изменён')+'</h3><small>'+esc(new Date(e.created_at).toLocaleString('ru-RU'))+' · '+(e.actor_id===state.actor?'вы':'администратор/пользователь '+e.actor_id)+'</small>'+(e.before_data?'<div class="audit-values">До: '+esc(e.before_data.name)+' · '+fmt(e.before_data.weight)+' кг · '+fmt(e.before_data.daily_calories)+' ккал</div>':'')+'<div class="audit-values">После: '+esc(e.after_data.name)+' · '+fmt(e.after_data.weight)+' кг · '+fmt(e.after_data.daily_calories)+' ккал<br>Цель: '+esc(e.after_data.goal_ru)+'<br>Рост '+fmt(e.after_data.height)+' см · возраст '+fmt(e.after_data.age)+'</div></article>').join(''):'<p class="profile-note">Профиль ещё не изменялся</p>';}
+ catch(error){$('#auditContent').textContent=errorMessage(error);}
+}
+
 function setupTelegram(){const app=telegram();app?.ready();app?.expand();app?.onEvent?.('activated',()=>{if(state.actor&&!state.busy)loadDay({force:true});});}
 $('#telegramSdk')?.addEventListener('load',setupTelegram,{once:true});setupTelegram();
 document.addEventListener('visibilitychange',()=>{if(document.hidden){prefetchRead?.abort();clearTimeout(prefetchTimer);}else if(state.actor&&!state.busy)loadDay({force:true});});
-installIcons();if(local)$('#demoNote').hidden=false;loadDay();
+installIcons();if(local)$('#demoNote').hidden=false;loadDay().then(()=>{if(launchParams.get('tab')==='profile'&&state.actor)showTab('profile');});
