@@ -23,6 +23,7 @@ async function waitForTelegram(){
  await new Promise(resolve=>{const script=$('#telegramSdk');let timer;const done=()=>{clearTimeout(timer);script?.removeEventListener('load',done);script?.removeEventListener('error',done);resolve();};script?.addEventListener('load',done,{once:true});script?.addEventListener('error',done,{once:true});timer=setTimeout(done,8000);});
 }
 async function api(data,options={}){
+ if(window.VILQA_DEMO)return window.VILQA_DEMO.request(data);
  await waitForTelegram();
  if(!initialData()&&!local)throw new Error('Открой дневник через кнопку в @vilqa_bot');
  let last;
@@ -39,6 +40,9 @@ async function api(data,options={}){
  if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit','recipe_delete','recipe_add','recipe_start','access_grant','access_revoke'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
  throw last;
 }
+function russianCount(value,forms){const n=Math.max(0,Number(value)||0),a=n%100,b=n%10;return n+' '+forms[a>=11&&a<=14?2:b===1?0:b>=2&&b<=4?1:2];}
+const entryCount=n=>russianCount(n,['запись','записи','записей']);
+function timezoneLabel(zone){return zone==='Europe/Moscow'?'Москва · UTC+3':zone||'—';}
 function target(){return state.user!==null?{user_id:state.user}:{};}
 function dateTitle(date){const d=new Date(date+'T12:00:00');return new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',weekday:'short'}).format(d);}
 function progress(value,goal){return Math.min(100,Math.max(0,Number(goal)>0?value/goal*100:0));}
@@ -46,7 +50,7 @@ function entryCard(row){return `<article class="entry${row.deleted_at?' deleted'
 function renderDay(data){
  const totals=data.totals||{};const p=data.profile||{};const goal=Number(p.daily_calories)||0;const remaining=goal-Number(totals.calories||0);
  const macro=(name,field)=>`<div class="macro"><label>${name}</label><strong>${fmt(totals[field])}</strong> <small>/ ${fmt(p['daily_'+field])} г</small><div class="progress-track"><span style="width:${progress(totals[field],p['daily_'+field])}%"></span></div></div>`;
- $('#dayContent').innerHTML=`<section class="summary" aria-label="Прогресс за день"><div class="summary-top"><span>Калории за день</span><span class="day-badge">${Number(totals.count)||0} записей</span></div><div class="calorie-value"><strong>${kcal(totals.calories)}</strong><span>${goal?'/ '+kcal(goal):''} ккал</span></div><p class="remaining">${goal?(remaining>=0?'Осталось '+kcal(remaining)+' ккал':'Выше ориентира на '+kcal(-remaining)+' ккал'):'Дневной ориентир пока не задан'}</p><div class="progress-track"><span style="width:${progress(totals.calories,goal)}%"></span></div></section><div class="macro-grid">${macro('Белки','protein')}${macro('Жиры','fats')}${macro('Углеводы','carbs')}</div><div class="section-heading"><h2>Записи за день</h2><span>${data.entries.filter(x=>!x.deleted_at).length} в дневнике</span></div><button type="button" class="recipe-day-add" id="openRecipesForDiary">${icon('recipes')}<span>Добавить из рецептов</span>${icon('right')}</button>${data.entries.length?data.entries.map(entryCard).join(''):`<div class="empty">${icon('bowl')}<h3>Здесь пока пусто</h3><p>Добавь еду текстом или голосом в чате с VILQA</p><a href="https://t.me/vilqa_bot">Перейти в бот</a></div>`}<label class="deleted-toggle"><input type="checkbox" id="showDeleted" ${state.deleted?'checked':''}>Показать удалённые записи</label>`;
+ $('#dayContent').innerHTML=`<div class="nutrition-dashboard"><section class="summary" aria-label="Прогресс за день"><div class="summary-top"><span class="calorie-label"><svg class="calorie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 4-3 5-3 8 0 1 .5 2 1.5 2.5C9 9 14 8 14 6c3 3 5 6 5 9a7 7 0 0 1-14 0c0-3 2-6 4-8-1 3 0 4 0 4"/></svg><span>Калории за день</span></span><span class="day-badge">${entryCount(totals.count)}</span></div><div class="calorie-value"><strong>${kcal(totals.calories)}</strong><span>${goal?'/ '+kcal(goal):''} ккал</span></div><p class="remaining">${goal?(remaining>=0?'Осталось '+kcal(remaining)+' ккал':'Выше ориентира на '+kcal(-remaining)+' ккал'):'Дневной ориентир пока не задан'}</p><div class="progress-track"><span style="width:${progress(totals.calories,goal)}%"></span></div></section><div class="macro-grid">${macro('Белки','protein')}${macro('Жиры','fats')}${macro('Углеводы','carbs')}</div></div><div class="section-heading"><h2>Записи за день</h2><span>${data.entries.filter(x=>!x.deleted_at).length} в дневнике</span></div><button type="button" class="recipe-day-add" id="openRecipesForDiary">${icon('recipes')}<span>Добавить из рецептов</span>${icon('right')}</button>${data.entries.length?data.entries.map(entryCard).join(''):`<div class="empty">${icon('bowl')}<h3>Здесь пока пусто</h3><p>Добавь еду текстом или голосом в чате с VILQA</p><a href="https://t.me/vilqa_bot">Перейти в бот</a></div>`}<label class="deleted-toggle"><input type="checkbox" id="showDeleted" ${state.deleted?'checked':''}>Показать удалённые записи</label>`;
  $('#showDeleted').addEventListener('change',e=>{state.deleted=e.target.checked;loadDay();});$('#openRecipesForDiary').addEventListener('click',()=>showTab('recipes'));
 }
 const dayCache=new Map();let cacheEpoch=0,foregroundRead=null,prefetchRead=null,prefetchTimer=null;
@@ -94,30 +98,35 @@ function historyEndDate(){
  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:state.profile?.timezone||'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
  const value=key=>parts.find(p=>p.type===key).value;return value('year')+'-'+value('month')+'-'+value('day');
 }
+let historyPlotDays=[];
 function historyChart(days,end){
- const byDate=new Map(days.map(d=>[d.date,d])),dates=Array.from({length:30},(_,i)=>offsetDate(end,i-29));
- const recorded=dates.filter(d=>Number(byDate.get(d)?.count)>0),total=recorded.reduce((s,d)=>s+Number(byDate.get(d).calories||0),0);
- const max=Math.max(1,...recorded.map(d=>Number(byDate.get(d).calories)||0)),ceiling=Math.ceil(max/500)*500;
- const short=d=>d.slice(8)+'.'+d.slice(5,7);
- const bars=dates.map((d,i)=>{const day=byDate.get(d),has=Number(day?.count)>0,n=has?Number(day.calories)||0:0,h=n/ceiling*126,x=35+i*9;
-  return '<rect x="'+x+'" y="'+(150-(has?Math.max(2,h):2))+'" width="6" height="'+(has?Math.max(2,h):2)+'" rx="2" fill="'+(has?'#88ad3d':'#dce3e8')+'"><title>'+short(d)+': '+(has?kcal(n)+' ккал':'нет записей')+'</title></rect>';
- }).join('');
- return '<section class="history-chart" aria-label="Калории за последние 30 дней"><div class="chart-heading"><div><span>За 30 дней</span><strong>'+kcal(total)+' <small>ккал</small></strong></div><div><span>Среднее за день с записями</span><strong>'+ (recorded.length?kcal(Math.round(total/recorded.length)):'—')+'</strong></div></div><svg viewBox="0 0 312 178" role="img" aria-label="'+esc('Записи за '+recorded.length+' из 30 дней. Всего '+kcal(total)+' ккал. Подробные значения по дням ниже.')+'"><text x="0" y="20">'+kcal(ceiling)+'</text><path d="M33 24H306M33 87H306M33 150H306" stroke="#edf0f2" fill="none"/>'+bars+'<text x="35" y="172">'+short(dates[0])+'</text><text x="170" y="172" text-anchor="middle">'+short(dates[15])+'</text><text x="303" y="172" text-anchor="end">'+short(end)+'</text></svg><p><i></i>Записанные калории <i class="missing"></i>Нет записей</p><small class="chart-note">Пустой день означает отсутствие записей, а не нулевое питание</small></section>';
+ const byDate=new Map(days.map(d=>[d.date,d]));historyPlotDays=Array.from({length:30},(_,i)=>{const date=offsetDate(end,i-29),r=byDate.get(date);return {date,has:Number(r?.count)>0,calories:Number(r?.calories)||0};});
+ const recorded=historyPlotDays.filter(d=>d.has),total=recorded.reduce((s,d)=>s+d.calories,0),ceiling=Math.ceil(Math.max(1,...recorded.map(d=>d.calories))/500)*500;
+ const short=d=>d.slice(8)+'.'+d.slice(5,7),selected=29;
+ const bars=historyPlotDays.map((d,i)=>{const h=d.has?Math.max(2,d.calories/ceiling*112):2;return '<rect data-history-bar="'+i+'" class="'+(d.has?'':'missing ')+(i===selected?'selected':'')+'" x="'+(35+i*9)+'" y="'+(150-h)+'" width="6" height="'+h+'" rx="3"><title>'+short(d.date)+': '+(d.has?kcal(d.calories)+' ккал':'нет записей')+'</title></rect>';}).join('');
+ return '<div class="history-summary-grid"><div class="chart-stat"><span>Калории за 30 дней</span><strong>'+kcal(total)+' <small>ккал</small></strong><small>'+russianCount(recorded.length,['день','дня','дней'])+' с записями</small></div><div class="chart-stat"><span>Среднее за день с записями</span><strong>'+(recorded.length?kcal(Math.round(total/recorded.length)):'—')+' <small>ккал</small></strong><small>По заполненным дням</small></div></div><section class="history-chart" aria-label="График калорий за 30 дней"><div class="history-plot-heading"><h3>Калории по дням</h3><span>30 дней</span></div><div class="history-interaction"><svg class="history-plot" viewBox="0 0 312 182" role="img" aria-label="'+esc('Калории по дням. Нажми на столбец или используй клавиши со стрелками.')+'"><text x="0" y="24">'+kcal(ceiling)+'</text><path d="M33 38H306M33 94H306M33 150H306" stroke="#bdcda9" stroke-opacity=".65" fill="none"/>'+bars+'<text x="35" y="176">'+short(historyPlotDays[0].date)+'</text><text x="170" y="176" text-anchor="middle">'+short(historyPlotDays[15].date)+'</text><text x="303" y="176" text-anchor="end">'+short(end)+'</text></svg><input id="historyRange" class="chart-range" type="range" min="0" max="29" value="29" step="1" aria-label="Выбрать день на графике"></div><p class="chart-gesture-hint">Нажми на столбец или проведи по графику</p><div class="history-selected" id="historySelected" aria-live="polite"></div></section>';
+}
+function selectHistoryDay(index){
+ const i=Math.max(0,Math.min(29,Number(index)||0)),day=historyPlotDays[i];if(!day)return;
+ const slider=$('#historyRange');if(!slider)return;slider.value=i;slider.setAttribute('aria-valuetext',dateTitle(day.date)+': '+(day.has?kcal(day.calories)+' ккал':'нет записей'));
+ $('#historySelected').innerHTML='<span>'+esc(dateTitle(day.date))+'</span><strong>'+(day.has?kcal(day.calories)+' ккал':'Нет записей')+'</strong>';
+ document.querySelectorAll('[data-history-bar]').forEach(el=>el.classList.toggle('selected',Number(el.dataset.historyBar)===i));
 }
 async function showTab(tab){
- if(state.busy)return;dismissNotice();state.tab=tab;state.adminMode=['admin','admin-profile'].includes(tab);
+ if(state.busy)return;dismissNotice();state.tab=tab;state.adminMode=['admin','admin-profile','admin-access'].includes(tab);
  if(!state.adminMode&&state.actor&&state.user!==state.actor){state.user=state.actor;await loadDay();}
- $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=!['profile','admin-profile'].includes(tab);$('#recipesView').hidden=tab!=='recipes';$('#adminBar').hidden=!state.adminMode;
- $('#adminProfile').textContent=tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
- $('#pageTitle').textContent=({day:'Дневник питания',history:'История питания',profile:'Профиль',recipes:'Рецепты',admin:'Админка','admin-profile':'Профиль пользователя'})[tab];
- document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===(tab==='admin-profile'?'admin':tab)));
+ $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=!['profile','admin-profile'].includes(tab);$('#recipesView').hidden=tab!=='recipes';$('#adminBar').hidden=!state.adminMode||tab==='admin-access';$('#adminNavigation').hidden=!state.adminMode;$('#adminAccessView').hidden=tab!=='admin-access';document.querySelectorAll('[data-admin-tab]').forEach(el=>{const active=el.dataset.adminTab===tab;el.classList.toggle('active',active);el.setAttribute('aria-current',active?'page':'false');});
+ $('#pageTitle').textContent=({day:'Дневник питания',history:'История питания',profile:'Профиль',recipes:'Рецепты',admin:'Админка','admin-profile':'Профиль пользователя','admin-access':'Доступ к боту'})[tab];
+ document.querySelectorAll('[data-tab]').forEach(el=>{const active=el.dataset.tab===(['admin-profile','admin-access'].includes(tab)?'admin':tab);el.classList.toggle('active',active);el.setAttribute('aria-current',active?'page':'false');});
  try{
   if(tab==='admin'){
    if(!state.admin)throw new Error('Нет доступа к админке');const result=await api({action:'users'});
-   $('#userSelect').innerHTML=result.users.map(u=>`<option value="${Number(u.user_id)}">${esc(u.name||u.username||u.user_id)}${u.username?' · @'+esc(u.username):''}</option>`).join('');$('#userSelect').value=String(state.user);await loadAccessAccounts();
+   $('#userSelect').innerHTML=result.users.map(u=>`<option value="${Number(u.user_id)}">${esc(u.name||u.username||u.user_id)}${u.username?' · @'+esc(u.username):''}</option>`).join('');$('#userSelect').value=String(state.user);
+  }else if(tab==='admin-access'){
+   if(!state.admin)throw new Error('Нет доступа к админке');await loadAccessAccounts();
   }else if(tab==='history'){
    $('#historyDays').innerHTML='<div class="skeleton"></div>';const end=historyEndDate();const result=await api({action:'history',date:end,...target()});if(state.tab!=='history')return;
-   $('#historyDays').innerHTML=historyChart(result.days,end)+(result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${Number(day.count)} записей · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${kcal(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>');
+   $('#historyDays').innerHTML=historyChart(result.days,end)+(result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${entryCount(day.count)} · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${kcal(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>');selectHistoryDay(29);
   }else if(tab==='recipes'){await loadRecipes();
   }else if(['profile','admin-profile'].includes(tab)){
    await renderProfile();
@@ -127,14 +136,14 @@ async function showTab(tab){
 function openEdit(row){
  state.editing={...row};const form=$('#editForm');for(const field of ['item_name','weight','calories','protein','fats','carbs'])form.elements[field].value=field==='calories'?Math.round(Number(row[field])):row[field];form.elements.date.value=row.date||'';form.elements.time.value=(row.time||'').slice(0,5);$('#autoScale').checked=true;$('#editError').hidden=true;$('#editDialog').showModal();
 }
-function ask(title,text,label){return new Promise(resolve=>{const dialog=$('#confirmDialog');$('#confirmTitle').textContent=title;$('#confirmText').textContent=text;$('#acceptConfirm').textContent=label;let accepted=false;const close=()=>{dialog.removeEventListener('close',close);resolve(accepted);};dialog.addEventListener('close',close);$('#acceptConfirm').onclick=()=>{accepted=true;dialog.close();};$('#cancelConfirm').onclick=()=>dialog.close();dialog.showModal();});}
+function ask(title,text,label,options={}){return new Promise(resolve=>{const dialog=$('#confirmDialog');$('#confirmTitle').textContent=title;$('#confirmText').textContent=text;$('#acceptConfirm').textContent=label;$('#acceptConfirm').classList.toggle('danger-primary',options.danger===true);let accepted=false;const close=()=>{dialog.removeEventListener('close',close);resolve(accepted);};dialog.addEventListener('close',close);$('#acceptConfirm').onclick=()=>{accepted=true;dialog.close();};$('#cancelConfirm').onclick=()=>dialog.close();dialog.showModal();});}
 async function mutate(action,row,extra={}){
  if(state.busy)return null;invalidateDays();state.busy=true;document.querySelectorAll('button').forEach(el=>el.disabled=true);
  try{return await api({action,id:row.id,version:row.version,user_id:row.user_id,request_id:crypto.randomUUID(),...extra});}
  finally{invalidateDays();state.busy=false;document.querySelectorAll('button').forEach(el=>el.disabled=false);}
 }
 async function destructive(action,row){
- const restore=action==='restore';if(!await ask(restore?'Восстановить запись?':'Удалить запись?',restore?'Запись снова появится в дневнике и войдёт в итог дня.':'Она исчезнет из итогов, но останется в истории. Удаление можно отменить.',restore?'Восстановить':'Удалить'))return;
+ const restore=action==='restore';if(!await ask(restore?'Восстановить запись?':'Удалить запись?',restore?'Запись снова появится в дневнике и войдёт в итог дня.':'Она исчезнет из итогов, но останется в истории. Удаление можно отменить.',restore?'Восстановить':'Удалить',{danger:!restore}))return;
  try{await mutate(action,row);await loadDay();notify(restore?'Запись восстановлена':'Запись удалена. Её можно восстановить.',true);}catch(error){notify(errorMessage(error));await loadDay();}
 }
 async function openAudit(row){
@@ -151,7 +160,6 @@ $('#auditContent').addEventListener('click',async event=>{const button=event.tar
 $('#historyDays').addEventListener('click',event=>{const el=event.target.closest('[data-date]');if(!el)return;state.date=el.dataset.date;showTab('day');loadDay();});
 $('#prevDay').addEventListener('click',()=>changeDay(-1));$('#nextDay').addEventListener('click',()=>changeDay(1));$('#dateInput').addEventListener('change',event=>{if(event.target.value){dismissNotice();state.date=event.target.value;loadDay();}});
 $('#userSelect').addEventListener('change',async event=>{dismissNotice();state.user=Number(event.target.value);state.profile=null;if(state.user===0)notify('Старые записи без владельца и даты показаны все вместе. Они не входят в дневники пользователей.');await loadDay({force:true});if(state.tab==='admin-profile')await renderProfile();});
-$('#adminProfile').addEventListener('click',()=>showTab(state.tab==='admin-profile'?'admin':'admin-profile'));
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.tab)));
 document.querySelectorAll('.close-dialog').forEach(el=>el.addEventListener('click',()=>{if(!state.busy)el.closest('dialog').close();}));
 document.querySelectorAll('dialog').forEach(el=>el.addEventListener('cancel',event=>{if(state.busy)event.preventDefault();}));
@@ -160,9 +168,8 @@ async function renderProfile(){
  const user=state.user;$('#profileContent').innerHTML='<div class="skeleton"></div>';
  const result=await api({action:'profile',...target()});if(user!==state.user)return;state.profile=result.profile||{};
  const p=state.profile;const line=(label,value)=>'<div class="profile-line"><span>'+label+'</span><strong>'+esc(value??'—')+'</strong></div>';
- $('#profileContent').innerHTML='<div class="profile-card"><h2>'+esc(p.name||'Профиль питания')+'</h2><div class="profile-grid">'+line('Цель',p.goal_ru)+line('Пол',p.gender==='male'?'Мужской':p.gender==='female'?'Женский':null)+line('Возраст',p.age?fmt(p.age)+' лет':null)+line('Рост',p.height?fmt(p.height)+' см':null)+line('Вес',p.weight?fmt(p.weight)+' кг':null)+line('Калории',p.daily_calories?kcal(p.daily_calories)+' ккал':null)+line('Активность',activityName(p.activity_level))+line('Часовой пояс',p.timezone)+'</div>'+(state.user>0?'<button class="primary profile-edit-button" id="openProfileEdit">'+icon('edit')+'Изменить параметры</button><button class="text-button profile-history-button" id="openProfileHistory">'+icon('history')+'История изменений</button>':'')+'<p class="profile-note">Новый ориентир действует после сохранения. Записи питания остаются на месте.</p></div>';
+ $('#profileContent').innerHTML='<div class="profile-card"><h2>'+esc(p.name||'Профиль питания')+'</h2><div class="profile-grid">'+line('Цель',p.goal_ru)+line('Пол',p.gender==='male'?'Мужской':p.gender==='female'?'Женский':null)+line('Возраст',p.age?fmt(p.age)+' лет':null)+line('Рост',p.height?fmt(p.height)+' см':null)+line('Вес',p.weight?fmt(p.weight)+' кг':null)+line('Калории',p.daily_calories?kcal(p.daily_calories)+' ккал':null)+line('Активность',activityName(p.activity_level))+line('Часовой пояс',timezoneLabel(p.timezone))+'</div>'+(state.user>0?'<button class="primary profile-edit-button" id="openProfileEdit">'+icon('edit')+'Изменить параметры</button><button class="text-button profile-history-button" id="openProfileHistory">'+icon('history')+'История изменений</button>':'')+'<p class="profile-note">Новый ориентир действует после сохранения. Записи питания остаются на месте.</p><a class="profile-bot-link" href="https://t.me/vilqa_bot">@vilqa_bot</a></div>';
  $('#openProfileEdit')?.addEventListener('click',openProfileEdit);$('#openProfileHistory')?.addEventListener('click',openProfileHistory);
- $('#adminProfile').textContent=state.tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
 }
 function activityName(value){return ({'1.2':'Сидячая','1.375':'Низкая','1.55':'Умеренная','1.725':'Высокая','1.9':'Очень высокая'})[String(Number(value))]||'—';}
 function openProfileEdit(){
@@ -187,7 +194,7 @@ async function openProfileHistory(){
 function setupTelegram(){const app=telegram();app?.ready();app?.expand();app?.onEvent?.('activated',()=>{if(state.actor&&!state.busy)loadDay({force:true});});}
 $('#telegramSdk')?.addEventListener('load',setupTelegram,{once:true});setupTelegram();
 document.addEventListener('visibilitychange',()=>{if(document.hidden){prefetchRead?.abort();clearTimeout(prefetchTimer);}else if(state.actor&&!state.busy)loadDay({force:true});});
-installIcons();if(local)$('#demoNote').hidden=false;loadDay().then(()=>{if(launchParams.get('tab')==='profile'&&state.actor)showTab('profile');});
+installIcons();if(local||window.VILQA_DEMO)$('#demoNote').hidden=false;loadDay().then(()=>{if(launchParams.get('tab')==='profile'&&state.actor)showTab('profile');});
 
 // Membership administration is checked again by the authenticated server API.
 let accessCandidate=null,accessBusy=false;
@@ -253,8 +260,8 @@ function recipeIngredients(recipe){
 }
 function renderRecipeList(){
  const query=$('#recipeSearch').value.trim().toLocaleLowerCase('ru');const filtered=recipeLibrary.filter(r=>String(r.recipe_name||'').toLocaleLowerCase('ru').includes(query));
- $('#recipeCount').textContent=filtered.length+' из '+recipeLibrary.length;
- $('#recipeList').innerHTML=filtered.length?filtered.map(r=>'<details class="recipe-card" data-recipe="'+Number(r.id)+'"><summary><span><strong>'+esc(r.recipe_name||'Без названия')+'</strong><small>'+ (recipeValue(r,'calories')===null?'Калорийность не указана':kcal(recipeValue(r,'calories'))+' ккал / 100 г')+'</small></span>'+icon('right')+'</summary><div class="recipe-details"><div class="recipe-heading"><h3>Состав</h3><span>'+ (Number(r.total_weight)>0?'Выход '+fmt(r.total_weight)+' г':'')+'</span></div>'+recipeIngredients(r)+'<label class="field recipe-portion">Вес порции, г<input type="number" min="0.1" max="10000" step="0.1" inputmode="decimal" value="100" data-recipe-weight aria-label="Вес порции в граммах"></label><div class="entry-values portion-values" aria-live="polite">'+portionValues(r,100)+'</div><p class="recipe-note">КБЖУ рассчитаны из сохранённого рецепта</p><button type="button" class="primary recipe-save-portion" data-recipe-add="'+Number(r.id)+'">'+icon('check')+'Записать порцию</button><button class="text-button danger" data-recipe-delete="'+Number(r.id)+'">'+icon('trash')+'Удалить рецепт</button></div></details>').join(''):'<div class="empty"><h3>'+ (query?'Ничего не найдено':'Сохрани первый рецепт')+'</h3><p>'+ (query?'Попробуй другое название':'Создай рецепт в чате с VILQA — он появится здесь')+'</p>'+ (query?'':'<a href="https://t.me/vilqa_bot">Перейти в бот</a>')+'</div>';
+ $('#recipeCount').textContent=query?filtered.length+' из '+recipeLibrary.length:russianCount(recipeLibrary.length,['рецепт','рецепта','рецептов']);
+ $('#recipeList').innerHTML=filtered.length?filtered.map(r=>'<details class="recipe-card" data-recipe="'+Number(r.id)+'"><summary><span><strong>'+esc(r.recipe_name||'Без названия')+'</strong><small>'+ (recipeValue(r,'calories')===null?'Калорийность не указана':kcal(recipeValue(r,'calories'))+' ккал / 100 г')+'</small></span>'+icon('right')+'</summary><div class="recipe-details"><div class="recipe-heading"><h3>Состав</h3><span>'+ (Number(r.total_weight)>0?'Выход '+fmt(r.total_weight)+' г':'')+'</span></div>'+recipeIngredients(r)+'<div class="recipe-nutrition"><span>На 100 г</span><div class="entry-values">'+portionValues(r,100)+'</div></div><button type="button" class="primary recipe-save-portion" data-recipe-add="'+Number(r.id)+'">'+icon('check')+'Записать порцию</button><button class="text-button danger" data-recipe-delete="'+Number(r.id)+'">'+icon('trash')+'Удалить рецепт</button></div></details>').join(''):'<div class="empty"><h3>'+ (query?'Ничего не найдено':'Сохрани первый рецепт')+'</h3><p>'+ (query?'Попробуй другое название':'Создай рецепт в чате с VILQA — он появится здесь')+'</p>'+ (query?'':'<a href="https://t.me/vilqa_bot">Перейти в бот</a>')+'</div>';
 }
 async function loadRecipes(){
  $('#recipeList').innerHTML='<div class="skeleton"></div>';$('#recipeCount').textContent='';
@@ -262,8 +269,7 @@ async function loadRecipes(){
  catch(error){if(state.tab!=='recipes')return;$('#recipeList').innerHTML='<div class="empty"><p>'+esc(errorMessage(error))+'</p><button class="text-button" id="retryRecipes">Повторить загрузку</button></div>';$('#retryRecipes').addEventListener('click',loadRecipes);}
 }
 $('#recipeSearch').addEventListener('input',renderRecipeList);
-$('#recipeList').addEventListener('input',event=>{if(!event.target.matches('[data-recipe-weight]'))return;const card=event.target.closest('[data-recipe]'),r=recipeLibrary.find(r=>Number(r.id)===Number(card.dataset.recipe)),weight=Number(event.target.value);card.querySelector('.portion-values').innerHTML=weight>0&&weight<=10000?portionValues(r,weight):'<span>Укажи вес от 0,1 до 10 000 г</span>';});
-$('#recipeList').addEventListener('click',async event=>{const button=event.target.closest('[data-recipe-delete]');if(!button||state.busy)return;const recipe=recipeLibrary.find(r=>Number(r.id)===Number(button.dataset.recipeDelete));if(!recipe)return;if(!await ask('Удалить рецепт «'+(recipe.recipe_name||'Без названия')+'»?','Он исчезнет из библиотеки и списка в боте. Записи дневника сохранятся.','Удалить'))return;try{await mutate('recipe_delete',recipe);recipeLibrary=recipeLibrary.filter(r=>Number(r.id)!==Number(recipe.id));renderRecipeList();notify('Рецепт удалён',true);}catch(error){notify(errorMessage(error));await loadRecipes();}});
+$('#recipeList').addEventListener('click',async event=>{const button=event.target.closest('[data-recipe-delete]');if(!button||state.busy)return;const recipe=recipeLibrary.find(r=>Number(r.id)===Number(button.dataset.recipeDelete));if(!recipe)return;if(!await ask('Удалить рецепт «'+(recipe.recipe_name||'Без названия')+'»?','Он исчезнет из библиотеки и списка в боте. Записи дневника сохранятся.','Удалить',{danger:true}))return;try{await mutate('recipe_delete',recipe);recipeLibrary=recipeLibrary.filter(r=>Number(r.id)!==Number(recipe.id));renderRecipeList();notify('Рецепт удалён',true);}catch(error){notify(errorMessage(error));await loadRecipes();}});
 
 let activeRecipePortion=null;
 function updateRecipePortionPreview(){if(!activeRecipePortion)return;const w=Number($('#recipePortionForm').elements.weight.value);$('#recipePortionPreview').innerHTML=w>=0.1&&w<=10000?portionValues(activeRecipePortion.recipe,w):'<span>Укажи вес от 0,1 до 10 000 г</span>';}
@@ -274,7 +280,7 @@ function openRecipePortion(recipe,weight){
  form.elements.date.value=state.date||historyEndDate();form.elements.time.value=parts.find(x=>x.type==='hour').value+':'+parts.find(x=>x.type==='minute').value;
  $('#recipePortionTitle').textContent=recipe.recipe_name||'Порция рецепта';$('#recipePortionError').hidden=true;updateRecipePortionPreview();$('#recipePortionDialog').showModal();
 }
-$('#recipeList').addEventListener('click',event=>{const button=event.target.closest('[data-recipe-add]');if(!button||state.busy)return;const r=recipeLibrary.find(r=>Number(r.id)===Number(button.dataset.recipeAdd));if(!r)return;openRecipePortion(r,button.closest('[data-recipe]').querySelector('[data-recipe-weight]').value);});
+$('#recipeList').addEventListener('click',event=>{const button=event.target.closest('[data-recipe-add]');if(!button||state.busy)return;const r=recipeLibrary.find(r=>Number(r.id)===Number(button.dataset.recipeAdd));if(!r)return;openRecipePortion(r,100);});
 $('#recipePortionForm').elements.weight.addEventListener('input',updateRecipePortionPreview);
 $('#recipePortionForm').addEventListener('submit',async event=>{
  event.preventDefault();if(state.busy||!activeRecipePortion||activeRecipePortion.completed)return;
@@ -291,5 +297,20 @@ $('#createRecipeInBot').addEventListener('click',async()=>{
  recipeStartRequestId=recipeStartRequestId||crypto.randomUUID();
  try{await api({action:'recipe_start',request_id:recipeStartRequestId});const app=telegram();if(app?.close){try{app.close();}catch{notify('Создание рецепта открыто в боте. Закрой Mini App, чтобы продолжить',true);}}else location.href='https://t.me/vilqa_bot';}
  catch(error){notify(errorMessage(error));}
- finally{state.busy=false;button.disabled=false;button.querySelector('span:last-child').textContent='Создать рецепт';}
+ finally{state.busy=false;button.disabled=false;button.querySelector('span:last-child').textContent='Создать';}
 });
+
+document.querySelectorAll('[data-admin-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.adminTab)));
+
+function updateEditingViewport(){const v=window.visualViewport,h=v?.height||innerHeight,top=v?.offsetTop||0;document.documentElement.style.setProperty('--editing-height',h+'px');document.documentElement.style.setProperty('--keyboard-inset',Math.max(0,innerHeight-h-top)+'px');}
+updateEditingViewport();window.visualViewport?.addEventListener('resize',updateEditingViewport);window.visualViewport?.addEventListener('scroll',updateEditingViewport);window.addEventListener('resize',updateEditingViewport);
+
+$('#historyDays').addEventListener('input',event=>{if(event.target.id==='historyRange')selectHistoryDay(event.target.value);});
+$('#historyDays').addEventListener('click',event=>{const plot=event.target.closest('.history-interaction');if(!plot)return;const box=plot.getBoundingClientRect();selectHistoryDay(Math.round(((event.clientX-box.left)/box.width*312-35)/9));});
+
+
+let chartPointer=null;
+const chartIndex=(event,plot)=>Math.round(((event.clientX-plot.getBoundingClientRect().left)/plot.getBoundingClientRect().width*312-38)/9);
+$('#historyDays').addEventListener('pointerdown',event=>{const plot=event.target.closest('.history-interaction');if(!plot||event.button!==0)return;chartPointer={id:event.pointerId,plot};plot.setPointerCapture(event.pointerId);selectHistoryDay(chartIndex(event,plot));});
+$('#historyDays').addEventListener('pointermove',event=>{if(chartPointer?.id===event.pointerId)selectHistoryDay(chartIndex(event,chartPointer.plot));});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])$('#historyDays').addEventListener(type,()=>{chartPointer=null;});
