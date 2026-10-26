@@ -87,6 +87,20 @@ function changeDay(offset){
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)button.animate?.([{transform:'translateX(0) scale(1)'},{transform:'translateX('+(offset*4)+'px) scale(.92)'},{transform:'translateX(0) scale(1)'}],{duration:190,easing:'ease-out'});
  loadDay({debounce:true});
 }
+function historyEndDate(){
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone:state.profile?.timezone||'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const value=key=>parts.find(p=>p.type===key).value;return value('year')+'-'+value('month')+'-'+value('day');
+}
+function historyChart(days,end){
+ const byDate=new Map(days.map(d=>[d.date,d])),dates=Array.from({length:30},(_,i)=>offsetDate(end,i-29));
+ const recorded=dates.filter(d=>Number(byDate.get(d)?.count)>0),total=recorded.reduce((s,d)=>s+Number(byDate.get(d).calories||0),0);
+ const max=Math.max(1,...recorded.map(d=>Number(byDate.get(d).calories)||0)),ceiling=Math.ceil(max/500)*500;
+ const short=d=>d.slice(8)+'.'+d.slice(5,7);
+ const bars=dates.map((d,i)=>{const day=byDate.get(d),has=Number(day?.count)>0,n=has?Number(day.calories)||0:0,h=n/ceiling*126,x=35+i*9;
+  return '<rect x="'+x+'" y="'+(150-(has?Math.max(2,h):2))+'" width="6" height="'+(has?Math.max(2,h):2)+'" rx="2" fill="'+(has?'#88ad3d':'#dce3e8')+'"><title>'+short(d)+': '+(has?fmt(n)+' ккал':'нет записей')+'</title></rect>';
+ }).join('');
+ return '<section class="history-chart" aria-label="Калории за последние 30 дней"><div class="chart-heading"><div><span>За 30 дней</span><strong>'+fmt(total)+' <small>ккал</small></strong></div><div><span>Среднее за день с записями</span><strong>'+ (recorded.length?fmt(Math.round(total/recorded.length)):'—')+'</strong></div></div><svg viewBox="0 0 312 178" role="img" aria-label="'+esc('Записи за '+recorded.length+' из 30 дней. Всего '+fmt(total)+' ккал. Подробные значения по дням ниже.')+'"><text x="0" y="20">'+fmt(ceiling)+'</text><path d="M33 24H306M33 87H306M33 150H306" stroke="#edf0f2" fill="none"/>'+bars+'<text x="35" y="172">'+short(dates[0])+'</text><text x="170" y="172" text-anchor="middle">'+short(dates[15])+'</text><text x="303" y="172" text-anchor="end">'+short(end)+'</text></svg><p><i></i>Записанные калории <i class="missing"></i>Нет записей</p><small class="chart-note">Пустой день означает отсутствие записей, а не нулевое питание</small></section>';
+}
 async function showTab(tab){
  if(state.busy)return;state.tab=tab;state.adminMode=['admin','admin-profile'].includes(tab);
  if(!state.adminMode&&state.actor&&state.user!==state.actor){state.user=state.actor;await loadDay();}
@@ -99,8 +113,8 @@ async function showTab(tab){
    if(!state.admin)throw new Error('Нет доступа к админке');const result=await api({action:'users'});
    $('#userSelect').innerHTML=result.users.map(u=>`<option value="${Number(u.user_id)}">${esc(u.name||u.username||u.user_id)}${u.username?' · @'+esc(u.username):''}</option>`).join('');$('#userSelect').value=String(state.user);await loadAccessAccounts();
   }else if(tab==='history'){
-   $('#historyDays').innerHTML='<div class="skeleton"></div>';const result=await api({action:'history',date:state.date,...target()});
-   $('#historyDays').innerHTML=result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${Number(day.count)} записей · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${fmt(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>';
+   $('#historyDays').innerHTML='<div class="skeleton"></div>';const end=historyEndDate();const result=await api({action:'history',date:end,...target()});if(state.tab!=='history')return;
+   $('#historyDays').innerHTML=historyChart(result.days,end)+(result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${Number(day.count)} записей · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${fmt(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>');
   }else if(['profile','admin-profile'].includes(tab)){
    await renderProfile();
   }
@@ -142,7 +156,7 @@ async function renderProfile(){
  const user=state.user;$('#profileContent').innerHTML='<div class="skeleton"></div>';
  const result=await api({action:'profile',...target()});if(user!==state.user)return;state.profile=result.profile||{};
  const p=state.profile;const line=(label,value)=>'<div class="profile-line"><span>'+label+'</span><strong>'+esc(value??'—')+'</strong></div>';
- $('#profileContent').innerHTML='<div class="profile-card"><h2>'+esc(p.name||'Профиль питания')+'</h2>'+line('Цель',p.goal_ru)+line('Пол',p.gender==='male'?'Мужской':p.gender==='female'?'Женский':null)+line('Возраст',p.age?fmt(p.age)+' лет':null)+line('Рост',p.height?fmt(p.height)+' см':null)+line('Вес',p.weight?fmt(p.weight)+' кг':null)+line('Калории',p.daily_calories?fmt(p.daily_calories)+' ккал':null)+line('Активность',activityName(p.activity_level))+line('Часовой пояс',p.timezone)+(state.user>0?'<button class="primary profile-edit-button" id="openProfileEdit">'+icon('edit')+'Изменить параметры</button><button class="text-button profile-history-button" id="openProfileHistory">'+icon('history')+'История изменений</button>':'')+'<p class="profile-note">Новый ориентир действует после сохранения. Записи питания остаются на месте.</p></div>';
+ $('#profileContent').innerHTML='<div class="profile-card"><h2>'+esc(p.name||'Профиль питания')+'</h2><div class="profile-grid">'+line('Цель',p.goal_ru)+line('Пол',p.gender==='male'?'Мужской':p.gender==='female'?'Женский':null)+line('Возраст',p.age?fmt(p.age)+' лет':null)+line('Рост',p.height?fmt(p.height)+' см':null)+line('Вес',p.weight?fmt(p.weight)+' кг':null)+line('Калории',p.daily_calories?fmt(p.daily_calories)+' ккал':null)+line('Активность',activityName(p.activity_level))+line('Часовой пояс',p.timezone)+'</div>'+(state.user>0?'<button class="primary profile-edit-button" id="openProfileEdit">'+icon('edit')+'Изменить параметры</button><button class="text-button profile-history-button" id="openProfileHistory">'+icon('history')+'История изменений</button>':'')+'<p class="profile-note">Новый ориентир действует после сохранения. Записи питания остаются на месте.</p></div>';
  $('#openProfileEdit')?.addEventListener('click',openProfileEdit);$('#openProfileHistory')?.addEventListener('click',openProfileHistory);
  $('#adminProfile').textContent=state.tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
 }
