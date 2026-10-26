@@ -1,5 +1,5 @@
 'use strict';
-const paths={left:'<path d="m14 6-6 6 6 6"/>',right:'<path d="m10 6 6 6-6 6"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>',diary:'<rect x="5" y="3" width="15" height="18" rx="3"/><path d="M8 3v18M12 8h4m-4 4h4"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 4h1m4 0h1"/>',profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',settings:'<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="white"/><circle cx="15" cy="17" r="3" fill="white"/>',edit:'<path d="m14 5 5 5M4 20l4-1L20 7a2 2 0 0 0-3-3L5 16Z"/>',trash:'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>',history:'<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7m2-5v6l4 2"/>',restore:'<path d="M4 10a8 8 0 1 1 0 6M4 4v6h6"/>',check:'<path d="m5 12 4 4L19 6"/>',bowl:'<path d="M3 10h18c0 7-4 10-9 10S3 17 3 10Zm6-6v3m6-3v3"/>'};
+const paths={recipes:'<path d="M4 4h6a3 3 0 0 1 2 2 3 3 0 0 1 2-2h6v16h-6a3 3 0 0 0-2 2 3 3 0 0 0-2-2H4ZM12 6v16M7 8h2m6 0h2M7 12h2m6 0h2"/>',left:'<path d="m14 6-6 6 6 6"/>',right:'<path d="m10 6 6 6-6 6"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>',diary:'<rect x="5" y="3" width="15" height="18" rx="3"/><path d="M8 3v18M12 8h4m-4 4h4"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 4h1m4 0h1"/>',profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',settings:'<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="white"/><circle cx="15" cy="17" r="3" fill="white"/>',edit:'<path d="m14 5 5 5M4 20l4-1L20 7a2 2 0 0 0-3-3L5 16Z"/>',trash:'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>',history:'<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7m2-5v6l4 2"/>',restore:'<path d="M4 10a8 8 0 1 1 0 6M4 4v6h6"/>',check:'<path d="m5 12 4 4L19 6"/>',bowl:'<path d="M3 10h18c0 7-4 10-9 10S3 17 3 10Zm6-6v3m6-3v3"/>'};
 const icon=name=>`<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.diary}</svg>`;
 const $=selector=>document.querySelector(selector);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -33,7 +33,7 @@ async function api(data,options={}){
    return result;
   }catch(error){if(options.signal?.aborted)throw new DOMException('Cancelled','AbortError');last=error;if(error.status||attempt===1)break;}finally{clearTimeout(timeout);options.signal?.removeEventListener('abort',abort);}
  }
- if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit','access_grant','access_revoke'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
+ if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit','recipe_delete','access_grant','access_revoke'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
  throw last;
 }
 function target(){return state.user!==null?{user_id:state.user}:{};}
@@ -104,9 +104,9 @@ function historyChart(days,end){
 async function showTab(tab){
  if(state.busy)return;state.tab=tab;state.adminMode=['admin','admin-profile'].includes(tab);
  if(!state.adminMode&&state.actor&&state.user!==state.actor){state.user=state.actor;await loadDay();}
- $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=!['profile','admin-profile'].includes(tab);$('#adminBar').hidden=!state.adminMode;
+ $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=!['profile','admin-profile'].includes(tab);$('#recipesView').hidden=tab!=='recipes';$('#adminBar').hidden=!state.adminMode;
  $('#adminProfile').textContent=tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
- $('#pageTitle').textContent=({day:'Дневник питания',history:'История питания',profile:'Профиль',admin:'Админка','admin-profile':'Профиль пользователя'})[tab];
+ $('#pageTitle').textContent=({day:'Дневник питания',history:'История питания',profile:'Профиль',recipes:'Рецепты',admin:'Админка','admin-profile':'Профиль пользователя'})[tab];
  document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===(tab==='admin-profile'?'admin':tab)));
  try{
   if(tab==='admin'){
@@ -115,6 +115,7 @@ async function showTab(tab){
   }else if(tab==='history'){
    $('#historyDays').innerHTML='<div class="skeleton"></div>';const end=historyEndDate();const result=await api({action:'history',date:end,...target()});if(state.tab!=='history')return;
    $('#historyDays').innerHTML=historyChart(result.days,end)+(result.days.length?result.days.map(day=>`<button class="day-row" data-date="${esc(day.date)}"><span><strong>${esc(dateTitle(day.date))}</strong><small>${Number(day.count)} записей · Б ${fmt(day.protein)} · Ж ${fmt(day.fats)} · У ${fmt(day.carbs)}</small></span><span><b>${fmt(day.calories)}</b><small>ккал</small></span></button>`).join(''):'<div class="empty"><h3>История ещё впереди</h3><p>Записи за последние 30 дней появятся здесь</p></div>');
+  }else if(tab==='recipes'){await loadRecipes();
   }else if(['profile','admin-profile'].includes(tab)){
    await renderProfile();
   }
@@ -219,3 +220,32 @@ $('#accessAccounts').addEventListener('click',async e=>{
  catch(error){accessError(errorMessage(error));}
  finally{accessBusy=false;state.busy=false;button.disabled=false;}
 });
+
+
+let recipeLibrary=[];
+function recipeValue(recipe,field){
+ const direct=recipe['per_100g_'+field];if(direct!==null&&direct!==undefined&&direct!==''&&Number.isFinite(Number(direct))&&Number(direct)>=0)return Number(direct);
+ const total=recipe['total_'+field],weight=Number(recipe.total_weight);return total!==null&&total!==undefined&&Number.isFinite(Number(total))&&Number(total)>=0&&weight>0?Number(total)*100/weight:null;
+}
+function portionValues(recipe,weight){
+ const value=field=>{const n=recipeValue(recipe,field);return n===null?'—':fmt(n*weight/100);};
+ return '<strong>'+value('calories')+' ккал</strong><span>Б '+value('protein')+'</span><span>Ж '+value('fats')+'</span><span>У '+value('carbs')+'</span>';
+}
+function recipeIngredients(recipe){
+ let ingredients=recipe.ingredients;try{if(typeof ingredients==='string')ingredients=JSON.parse(ingredients);}catch{}
+ if(Array.isArray(ingredients)&&ingredients.length)return '<ul class="recipe-ingredients">'+ingredients.map(item=>{if(typeof item==='string')return '<li>'+esc(item)+'</li>';if(!item||typeof item!=='object')return '';return '<li><span>'+esc(item.name||item.item_name||'Ингредиент')+'</span><span>'+ (item.weight!==null&&item.weight!==undefined&&Number.isFinite(Number(item.weight))?fmt(item.weight)+' г':'')+'</span></li>';}).join('')+'</ul>';
+ return '<p class="recipe-description">'+esc(typeof ingredients==='string'&&ingredients.trim()?ingredients:'Состав не указан в сохранённом рецепте')+'</p>';
+}
+function renderRecipeList(){
+ const query=$('#recipeSearch').value.trim().toLocaleLowerCase('ru');const filtered=recipeLibrary.filter(r=>String(r.recipe_name||'').toLocaleLowerCase('ru').includes(query));
+ $('#recipeCount').textContent=filtered.length+' из '+recipeLibrary.length;
+ $('#recipeList').innerHTML=filtered.length?filtered.map(r=>'<details class="recipe-card" data-recipe="'+Number(r.id)+'"><summary><span><strong>'+esc(r.recipe_name||'Без названия')+'</strong><small>'+ (recipeValue(r,'calories')===null?'Калорийность не указана':fmt(recipeValue(r,'calories'))+' ккал / 100 г')+'</small></span>'+icon('right')+'</summary><div class="recipe-details"><div class="recipe-heading"><h3>Состав</h3><span>'+ (Number(r.total_weight)>0?'Выход '+fmt(r.total_weight)+' г':'')+'</span></div>'+recipeIngredients(r)+'<label class="field recipe-portion">Вес порции, г<input type="number" min="0.1" max="10000" step="0.1" inputmode="decimal" value="100" data-recipe-weight aria-label="Вес порции в граммах"></label><div class="entry-values portion-values" aria-live="polite">'+portionValues(r,100)+'</div><p class="recipe-note">КБЖУ рассчитаны из сохранённого рецепта</p><button class="text-button danger" data-recipe-delete="'+Number(r.id)+'">'+icon('trash')+'Удалить рецепт</button></div></details>').join(''):'<div class="empty"><h3>'+ (query?'Ничего не найдено':'Сохрани первый рецепт')+'</h3><p>'+ (query?'Попробуй другое название':'Создай рецепт в чате с VILQA — он появится здесь')+'</p>'+ (query?'':'<a href="https://t.me/vilqa_bot">Перейти в бот</a>')+'</div>';
+}
+async function loadRecipes(){
+ $('#recipeList').innerHTML='<div class="skeleton"></div>';$('#recipeCount').textContent='';
+ try{const result=await api({action:'recipes'});if(state.tab!=='recipes')return;recipeLibrary=result.recipes||[];renderRecipeList();}
+ catch(error){if(state.tab!=='recipes')return;$('#recipeList').innerHTML='<div class="empty"><p>'+esc(errorMessage(error))+'</p><button class="text-button" id="retryRecipes">Повторить загрузку</button></div>';$('#retryRecipes').addEventListener('click',loadRecipes);}
+}
+$('#recipeSearch').addEventListener('input',renderRecipeList);
+$('#recipeList').addEventListener('input',event=>{if(!event.target.matches('[data-recipe-weight]'))return;const card=event.target.closest('[data-recipe]'),r=recipeLibrary.find(r=>Number(r.id)===Number(card.dataset.recipe)),weight=Number(event.target.value);card.querySelector('.portion-values').innerHTML=weight>0&&weight<=10000?portionValues(r,weight):'<span>Укажи вес от 0,1 до 10 000 г</span>';});
+$('#recipeList').addEventListener('click',async event=>{const button=event.target.closest('[data-recipe-delete]');if(!button||state.busy)return;const recipe=recipeLibrary.find(r=>Number(r.id)===Number(button.dataset.recipeDelete));if(!recipe)return;if(!await ask('Удалить рецепт «'+(recipe.recipe_name||'Без названия')+'»?','Он исчезнет из библиотеки и списка в боте. Записи дневника сохранятся.','Удалить'))return;try{await mutate('recipe_delete',recipe);recipeLibrary=recipeLibrary.filter(r=>Number(r.id)!==Number(recipe.id));renderRecipeList();notify('Рецепт удалён',true);}catch(error){notify(errorMessage(error));await loadRecipes();}});
