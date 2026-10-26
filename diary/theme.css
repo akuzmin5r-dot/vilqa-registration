@@ -45,3 +45,5 @@
 .recipe-nutrition .nutrition-metric strong{font-size:12px;font-weight:400;color:#65715e}
 .recipe-nutrition .nutrition-metric small{font-size:12px;color:inherit}
 .recipe-nutrition .nutrition-metric:not(:first-child) small{display:none}
+.entry>.entry-values{gap:0;align-items:baseline}
+.entry>.entry-values>span::before{content:"·";display:inline-block;margin:0 7px;color:#8b9584}
