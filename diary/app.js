@@ -315,3 +315,13 @@ const chartIndex=(event,plot)=>Math.round(((event.clientX-plot.getBoundingClient
 $('#historyDays').addEventListener('pointerdown',event=>{const plot=event.target.closest('.history-interaction');if(!plot||event.button!==0)return;chartPointer={id:event.pointerId,plot};plot.setPointerCapture(event.pointerId);selectHistoryDay(chartIndex(event,plot));});
 $('#historyDays').addEventListener('pointermove',event=>{if(chartPointer?.id===event.pointerId)selectHistoryDay(chartIndex(event,chartPointer.plot));});
 for(const type of ['pointerup','pointercancel','lostpointercapture'])$('#historyDays').addEventListener(type,()=>{chartPointer=null;});
+
+// Dismiss only a complete tap on the backdrop, never a drag out of a form.
+document.querySelectorAll('dialog').forEach(dialog=>{
+ let backdropPointer=null;
+ const outside=event=>{const r=dialog.getBoundingClientRect();return event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom;};
+ dialog.addEventListener('pointerdown',event=>{backdropPointer=event.isPrimary&&event.button===0&&outside(event)?event.pointerId:null;});
+ dialog.addEventListener('click',event=>{const dismiss=backdropPointer!==null&&outside(event);backdropPointer=null;if(dismiss&&!state.busy)dialog.close();});
+ dialog.addEventListener('pointercancel',()=>{backdropPointer=null;});
+ dialog.addEventListener('close',()=>{backdropPointer=null;});
+});
