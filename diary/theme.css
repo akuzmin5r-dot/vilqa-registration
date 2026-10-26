@@ -52,3 +52,4 @@
 .recipe-inline-values>strong{font-size:13px;font-weight:500;color:#263d27}
 .recipe-inline-values>span::before{content:"·";display:inline-block;margin:0 7px;color:#8b9584}
 .recipe-nutrition{border-radius:0}
+.create-recipe-button{border:0}
