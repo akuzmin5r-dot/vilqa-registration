@@ -19,3 +19,16 @@
 .nutrition-dashboard .macro:nth-child(3){background:#f4eac7}
 .profile-grid .profile-line{background:#f0f3e9}
 .profile-history-button{background:transparent}
+
+/* Stable icon alignment and readable nutrition summary. */
+.primary>svg,.primary>[data-icon]{width:18px;height:18px;flex:0 0 18px;display:block;margin:0;align-self:center}
+.primary>[data-icon] svg{display:block;width:18px;height:18px}
+.primary{line-height:20px}
+.recipe-nutrition{background:transparent;padding:14px 0;margin:12px 0 16px;border-top:1px solid #e5e9df}
+.recipe-nutrition>span{margin-bottom:10px}
+.recipe-nutrition .entry-values,#recipePortionPreview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:transparent;padding:0;border-radius:0;line-height:1.4}
+.nutrition-metric{display:flex;flex-direction:column;gap:5px;min-width:0;padding:11px 8px;background:#f2f5ed;border-radius:13px}
+.nutrition-metric-label{font-size:10px;color:#62705b;white-space:nowrap}
+.nutrition-metric strong{font-size:15px;font-weight:500;color:#2c3b29;white-space:nowrap}
+.nutrition-metric small{font-size:10px;font-weight:400;color:#62705b}
+@media(max-width:360px){.recipe-nutrition .entry-values,#recipePortionPreview{gap:5px}.nutrition-metric{padding:10px 6px}.nutrition-metric strong{font-size:13px}.nutrition-metric-label{font-size:9px}}
