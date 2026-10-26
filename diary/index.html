@@ -6,14 +6,14 @@
  <script async id="telegramSdk" src="https://telegram.org/js/telegram-web-app.js"></script>
  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
- <link rel="stylesheet" href="styles.css?v=search-type-20261026"><script defer src="app.js?v=polish-20261026"></script>
+ <link rel="stylesheet" href="styles.css?v=loader-ai-20261026"><script defer src="app.js?v=polish-20261026"></script>
 </head>
 <body class="booting">
  <main class="app">
   <header class="app-header"><div><h1 id="pageTitle">Дневник питания</h1></div></header>
   <p class="demo-note" id="demoNote" hidden>Предпросмотр · вымышленные данные</p>
   <div id="message" class="message" role="status" aria-live="polite" hidden></div>
-  <section id="initialLoader" class="initial-loader" role="status" aria-live="polite"><div class="loader-content"><div class="loader-art"><img src="../assets/vilqa-mascot.svg?v=original-1" alt="" width="52" height="80"></div><h2>VILQA</h2><p>Загружаем дневник питания</p><svg class="loader-spinner" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-8-8"/></svg></div></section>
+  <section id="initialLoader" class="initial-loader" role="status" aria-live="polite"><div class="loader-content"><div class="loader-art"><img src="../assets/vilqa-mascot.svg?v=original-1" alt="" width="52" height="80"></div><h2>VILQA AI</h2><p>Загружаем дневник питания</p><svg class="loader-spinner" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-8-8"/></svg></div></section>
   <div id="adminBar" class="admin-bar" hidden><label for="userSelect">Дневник пользователя</label><select id="userSelect"></select><p>Правки сохраняются от имени администратора</p><button class="text-button" id="adminProfile">Профиль пользователя</button><details id="accessPanel" class="access-panel"><summary>Доступ к боту</summary><p>Добавляй аккаунты по Telegram-нику. Доступ привязывается к ID человека.</p><form id="accessLookupForm"><label for="accessUsername">Telegram-ник</label><div class="access-search"><input id="accessUsername" name="username" placeholder="@username" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="33" required><button type="submit" class="secondary" id="accessFind">Найти</button></div></form><p id="accessError" class="inline-error" role="alert" hidden></p><div id="accessCandidate"></div><div id="accessAccounts" aria-live="polite"></div></details></div>
   <section id="dayView" hidden>
    <div class="date-bar"><button class="icon-button" id="prevDay" aria-label="Предыдущий день" data-icon="left"></button><label class="date-label"><span id="dateLabel">Сегодня</span><input type="date" id="dateInput" aria-label="Выбрать дату"></label><button class="icon-button" id="nextDay" aria-label="Следующий день" data-icon="right"></button></div>
