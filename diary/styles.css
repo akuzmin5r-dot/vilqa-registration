@@ -31,3 +31,5 @@
 
 /* Avoid a classic desktop scrollbar gutter appearing only on long tabs. Scrolling stays enabled. */
 html,body{scrollbar-width:none}html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0}.bottom-nav{left:0;right:0;inset-inline:0;width:auto;max-width:none;transform:none}.app-header{padding-top:20px;padding-bottom:20px}.app-header h1{margin:0}
+
+.day-row>span:last-child{text-align:right;flex-shrink:0}.day-row>span:first-child{min-width:0}
