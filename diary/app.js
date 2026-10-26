@@ -13,7 +13,9 @@ const launchDate=launchParams.get('date')||'';
 const validLaunchDate=/^\d{4}-\d{2}-\d{2}$/.test(launchDate)&&!Number.isNaN(Date.parse(launchDate+'T12:00:00'))&&new Date(launchDate+'T12:00:00Z').toISOString().slice(0,10)===launchDate;
 const state={date:validLaunchDate?launchDate:'',actor:null,user:null,admin:false,adminMode:false,profile:null,entries:[],deleted:launchParams.get('deleted')==='1',focusEntry:Number(launchParams.get('entry'))||null,tab:'day',editing:null,busy:false,loadId:0};
 function installIcons(root=document){root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});}
-function notify(text,success=false){const el=$('#message');el.textContent=text;el.classList.toggle('success',success);el.hidden=false;}
+let noticeTimer=null;
+function dismissNotice(){clearTimeout(noticeTimer);noticeTimer=null;const el=$('#message');el.hidden=true;el.textContent='';el.classList.remove('success');}
+function notify(text,success=false){dismissNotice();const el=$('#message');el.textContent=text;el.classList.toggle('success',success);el.hidden=false;if(success)noticeTimer=setTimeout(dismissNotice,4000);}
 function errorMessage(error){return error?.message||'Не удалось загрузить дневник. Попробуй ещё раз.';}
 async function waitForTelegram(){
  if(local||initialData()||telegram())return;
@@ -83,7 +85,7 @@ async function loadDay(options={}){
  finally{if(id===state.loadId){content.removeAttribute('aria-busy');dateBar.classList.remove('is-loading');$('#initialLoader').hidden=true;document.body.classList.remove('booting');$('#dayView').hidden=!['day','admin'].includes(state.tab);}}
 }
 function changeDay(offset){
- if(state.busy||!state.date)return;state.date=offsetDate(state.date,offset);const button=$(offset<0?'#prevDay':'#nextDay');
+ if(state.busy||!state.date)return;dismissNotice();state.date=offsetDate(state.date,offset);const button=$(offset<0?'#prevDay':'#nextDay');
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)button.animate?.([{transform:'translateX(0) scale(1)'},{transform:'translateX('+(offset*4)+'px) scale(.92)'},{transform:'translateX(0) scale(1)'}],{duration:190,easing:'ease-out'});
  loadDay({debounce:true});
 }
@@ -102,7 +104,7 @@ function historyChart(days,end){
  return '<section class="history-chart" aria-label="Калории за последние 30 дней"><div class="chart-heading"><div><span>За 30 дней</span><strong>'+fmt(total)+' <small>ккал</small></strong></div><div><span>Среднее за день с записями</span><strong>'+ (recorded.length?fmt(Math.round(total/recorded.length)):'—')+'</strong></div></div><svg viewBox="0 0 312 178" role="img" aria-label="'+esc('Записи за '+recorded.length+' из 30 дней. Всего '+fmt(total)+' ккал. Подробные значения по дням ниже.')+'"><text x="0" y="20">'+fmt(ceiling)+'</text><path d="M33 24H306M33 87H306M33 150H306" stroke="#edf0f2" fill="none"/>'+bars+'<text x="35" y="172">'+short(dates[0])+'</text><text x="170" y="172" text-anchor="middle">'+short(dates[15])+'</text><text x="303" y="172" text-anchor="end">'+short(end)+'</text></svg><p><i></i>Записанные калории <i class="missing"></i>Нет записей</p><small class="chart-note">Пустой день означает отсутствие записей, а не нулевое питание</small></section>';
 }
 async function showTab(tab){
- if(state.busy)return;state.tab=tab;state.adminMode=['admin','admin-profile'].includes(tab);
+ if(state.busy)return;dismissNotice();state.tab=tab;state.adminMode=['admin','admin-profile'].includes(tab);
  if(!state.adminMode&&state.actor&&state.user!==state.actor){state.user=state.actor;await loadDay();}
  $('#dayView').hidden=!['day','admin'].includes(tab);$('#historyView').hidden=tab!=='history';$('#profileView').hidden=!['profile','admin-profile'].includes(tab);$('#recipesView').hidden=tab!=='recipes';$('#adminBar').hidden=!state.adminMode;
  $('#adminProfile').textContent=tab==='admin-profile'?'Открыть дневник пользователя':'Профиль пользователя';
@@ -146,8 +148,8 @@ $('#editForm').addEventListener('submit',async event=>{event.preventDefault();if
 $('#dayContent').addEventListener('click',event=>{const button=event.target.closest('[data-action]');if(!button||state.busy)return;const row=state.entries.find(r=>r.id===Number(button.closest('[data-entry]').dataset.entry));if(!row)return;if(button.dataset.action==='edit')openEdit(row);else if(button.dataset.action==='audit')openAudit(row);else destructive(button.dataset.action,row);});
 $('#auditContent').addEventListener('click',async event=>{const button=event.target.closest('[data-revert]');if(!button)return;const row=state.entries.find(r=>r.id===Number(button.dataset.entryId));if(!row)return;$('#auditDialog').close();if(!await ask('Вернуть прежние значения?','Текущие значения тоже сохранятся в истории.','Вернуть'))return;try{const result=await mutate('revert',row,{audit_id:Number(button.dataset.revert)});if(result?.entry?.date)state.date=result.entry.date;await loadDay();notify('Прежние значения восстановлены',true);}catch(error){notify(errorMessage(error));await loadDay();}});
 $('#historyDays').addEventListener('click',event=>{const el=event.target.closest('[data-date]');if(!el)return;state.date=el.dataset.date;showTab('day');loadDay();});
-$('#prevDay').addEventListener('click',()=>changeDay(-1));$('#nextDay').addEventListener('click',()=>changeDay(1));$('#dateInput').addEventListener('change',event=>{if(event.target.value){state.date=event.target.value;loadDay();}});
-$('#userSelect').addEventListener('change',async event=>{state.user=Number(event.target.value);state.profile=null;if(state.user===0)notify('Старые записи без владельца и даты показаны все вместе. Они не входят в дневники пользователей.');await loadDay({force:true});if(state.tab==='admin-profile')await renderProfile();});
+$('#prevDay').addEventListener('click',()=>changeDay(-1));$('#nextDay').addEventListener('click',()=>changeDay(1));$('#dateInput').addEventListener('change',event=>{if(event.target.value){dismissNotice();state.date=event.target.value;loadDay();}});
+$('#userSelect').addEventListener('change',async event=>{dismissNotice();state.user=Number(event.target.value);state.profile=null;if(state.user===0)notify('Старые записи без владельца и даты показаны все вместе. Они не входят в дневники пользователей.');await loadDay({force:true});if(state.tab==='admin-profile')await renderProfile();});
 $('#adminProfile').addEventListener('click',()=>showTab(state.tab==='admin-profile'?'admin':'admin-profile'));
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.tab)));
 document.querySelectorAll('.close-dialog').forEach(el=>el.addEventListener('click',()=>{if(!state.busy)el.closest('dialog').close();}));
