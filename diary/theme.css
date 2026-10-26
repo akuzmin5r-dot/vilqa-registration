@@ -47,3 +47,8 @@
 .recipe-nutrition .nutrition-metric:not(:first-child) small{display:none}
 .entry>.entry-values{gap:0;align-items:baseline}
 .entry>.entry-values>span::before{content:"·";display:inline-block;margin:0 7px;color:#8b9584}
+
+.recipe-nutrition .recipe-inline-values{display:flex;align-items:baseline;flex-wrap:wrap;gap:0;font-size:13px;line-height:1.6;color:#4c5b49}
+.recipe-inline-values>strong{font-size:13px;font-weight:500;color:#263d27}
+.recipe-inline-values>span::before{content:"·";display:inline-block;margin:0 7px;color:#8b9584}
+.recipe-nutrition{border-radius:0}
