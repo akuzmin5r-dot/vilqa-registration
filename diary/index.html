@@ -6,7 +6,7 @@
  <script async id="telegramSdk" src="https://telegram.org/js/telegram-web-app.js"></script>
  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
- <link rel="stylesheet" href="styles.css?v=portions-20261026"><script defer src="app.js?v=portions-20261026"></script>
+ <link rel="stylesheet" href="styles.css?v=recipe-start-20261026"><script defer src="app.js?v=recipe-start-20261026"></script>
 </head>
 <body class="booting">
  <main class="app">
@@ -20,7 +20,7 @@
    <div id="dayContent" aria-live="polite"><div class="skeleton"></div><div class="skeleton small"></div></div>
   </section>
   <section id="historyView" hidden><div class="section-heading"><h2>Последние 30 дней</h2><span>Выбери день</span></div><div id="historyDays"></div></section>
-  <section id="recipesView" hidden><div class="section-heading"><h2>Сохранённые рецепты</h2><span id="recipeCount"></span></div><label class="recipe-search field">Поиск по названию<input type="search" id="recipeSearch" placeholder="Например, сырники" autocomplete="off"></label><div id="recipeList"></div></section>
+  <section id="recipesView" hidden><div class="section-heading"><h2>Сохранённые рецепты</h2><span id="recipeCount"></span></div><button type="button" class="primary create-recipe-button" id="createRecipeInBot"><span data-icon="recipes"></span><span>Создать рецепт</span></button><label class="recipe-search field">Поиск по названию<input type="search" id="recipeSearch" placeholder="Например, сырники" autocomplete="off"></label><div id="recipeList"></div></section>
   <section id="profileView" hidden><div id="profileContent"></div></section>
   <footer class="page-footer"><span>Каждая запись под контролем</span><a href="https://t.me/vilqa_bot">@vilqa_bot</a></footer>
  </main>

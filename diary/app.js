@@ -33,7 +33,7 @@ async function api(data,options={}){
    return result;
   }catch(error){if(options.signal?.aborted)throw new DOMException('Cancelled','AbortError');last=error;if(error.status||attempt===1)break;}finally{clearTimeout(timeout);options.signal?.removeEventListener('abort',abort);}
  }
- if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit','recipe_delete','recipe_add','access_grant','access_revoke'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
+ if(last?.name==='AbortError'||last instanceof TypeError)throw new Error(['edit','delete','restore','revert','profile_edit','recipe_delete','recipe_add','recipe_start','access_grant','access_revoke'].includes(data.action)?'Связь прервалась. Изменение могло сохраниться — обнови дневник перед повторной правкой.':'Не удалось загрузить данные. Проверь соединение и попробуй ещё раз.');
  throw last;
 }
 function target(){return state.user!==null?{user_id:state.user}:{};}
@@ -268,4 +268,13 @@ $('#recipePortionForm').addEventListener('submit',async event=>{
  form.querySelectorAll('input').forEach(el=>el.disabled=true);$('#recipePortionError').hidden=true;
  try{const result=await mutate('recipe_add',portion.recipe,portion.pending);if(!result?.entry)throw new Error('Не удалось подтвердить запись. Проверь дневник');portion.completed=true;state.date=result.entry.date;state.user=state.actor;$('#recipePortionDialog').close();await showTab('day');await loadDay({force:true});notify('Порция записана: '+fmt(result.entry.weight)+' г · '+fmt(result.entry.calories)+' ккал',true);}
  catch(error){if([400,403,404,422].includes(error.status)){portion.pending=null;form.querySelectorAll('input').forEach(el=>el.disabled=false);}$('#recipePortionError').textContent=errorMessage(error);$('#recipePortionError').hidden=false;}
+});
+
+let recipeStartRequestId=null;
+$('#createRecipeInBot').addEventListener('click',async()=>{
+ if(state.busy)return;const button=$('#createRecipeInBot');state.busy=true;button.disabled=true;button.querySelector('span:last-child').textContent='Открываем бота…';
+ recipeStartRequestId=recipeStartRequestId||crypto.randomUUID();
+ try{await api({action:'recipe_start',request_id:recipeStartRequestId});const app=telegram();if(app?.close){try{app.close();}catch{notify('Создание рецепта открыто в боте. Закрой Mini App, чтобы продолжить',true);}}else location.href='https://t.me/vilqa_bot';}
+ catch(error){notify(errorMessage(error));}
+ finally{state.busy=false;button.disabled=false;button.querySelector('span:last-child').textContent='Создать рецепт';}
 });
