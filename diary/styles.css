@@ -23,3 +23,5 @@
 .recipe-day-add{display:flex;align-items:center;gap:10px;width:100%;padding:14px 16px;border-radius:16px;background:#e9f0df;color:#435839;font-size:13px;margin:16px 0 4px;min-height:48px}.recipe-day-add span{flex:1;text-align:left}.recipe-day-add svg{width:18px;height:18px}.recipe-save-portion{margin:12px 0 8px}.portion-date{margin-top:22px}#recipePortionTitle{overflow-wrap:anywhere}#recipePortionPreview{border-radius:14px;background:#f1f5e9;padding:14px;margin-top:4px}
 
 .create-recipe-button{margin:0 0 18px;background:#dfeacb;color:#354c29}.create-recipe-button>span:first-child{display:flex;align-items:center}
+
+.recipe-data-note{font-size:11px;line-height:1.5;color:#8a7150;background:#faf4e8;border-radius:12px;padding:11px 12px;margin:8px 0 18px}.recipe-card summary:focus-visible{outline:2px solid #88ad3d;outline-offset:-3px;border-radius:20px}

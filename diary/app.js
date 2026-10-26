@@ -231,10 +231,22 @@ function portionValues(recipe,weight){
  const value=field=>{const n=recipeValue(recipe,field);return n===null?'—':fmt(n*weight/100);};
  return '<strong>'+value('calories')+' ккал</strong><span>Б '+value('protein')+'</span><span>Ж '+value('fats')+'</span><span>У '+value('carbs')+'</span>';
 }
+function parseRecipeIngredients(raw){
+ let value=raw;for(let i=0;i<2&&typeof value==='string';i++){try{value=JSON.parse(value);}catch{break;}}
+ if(Array.isArray(value))return {items:value,partial:false};
+ const text=typeof value==='string'?value.trim():'';
+ if(!text.startsWith('['))return {items:[],text:text&&!/^[{]/.test(text)?text:'',partial:false};
+ const items=[];let depth=0,start=-1,quoted=false,escaped=false;
+ for(let i=0;i<Math.min(text.length,100000);i++){
+  const c=text[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue;}
+  if(c==='"'){quoted=true;continue;}if(c==='{'){if(depth===0)start=i;depth++;}else if(c==='}'&&depth>0){depth--;if(depth===0&&start>=0){try{const item=JSON.parse(text.slice(start,i+1));if(item&&typeof item==='object'&&typeof (item.name||item.item_name)==='string')items.push(item);}catch{}start=-1;}}
+ }
+ return {items,partial:true};
+}
 function recipeIngredients(recipe){
- let ingredients=recipe.ingredients;try{if(typeof ingredients==='string')ingredients=JSON.parse(ingredients);}catch{}
- if(Array.isArray(ingredients)&&ingredients.length)return '<ul class="recipe-ingredients">'+ingredients.map(item=>{if(typeof item==='string')return '<li>'+esc(item)+'</li>';if(!item||typeof item!=='object')return '';return '<li><span>'+esc(item.name||item.item_name||'Ингредиент')+'</span><span>'+ (item.weight!==null&&item.weight!==undefined&&Number.isFinite(Number(item.weight))?fmt(item.weight)+' г':'')+'</span></li>';}).join('')+'</ul>';
- return '<p class="recipe-description">'+esc(typeof ingredients==='string'&&ingredients.trim()?ingredients:'Состав не указан в сохранённом рецепте')+'</p>';
+ const result=parseRecipeIngredients(recipe.ingredients),items=result.items;
+ if(items.length)return '<ul class="recipe-ingredients">'+items.map(item=>{if(typeof item==='string')return '<li>'+esc(item)+'</li>';if(!item||typeof item!=='object')return '';return '<li><span>'+esc(item.name||item.item_name||'Ингредиент')+'</span><span>'+ (item.weight!==null&&item.weight!==undefined&&Number.isFinite(Number(item.weight))?fmt(item.weight)+' г':'')+'</span></li>';}).join('')+'</ul>'+(result.partial?'<p class="recipe-data-note">Состав сохранён не полностью. Показаны доступные ингредиенты.</p>':'');
+ return '<p class="recipe-description">'+esc(result.text||'Состав не указан или сохранён с ошибкой')+'</p>';
 }
 function renderRecipeList(){
  const query=$('#recipeSearch').value.trim().toLocaleLowerCase('ru');const filtered=recipeLibrary.filter(r=>String(r.recipe_name||'').toLocaleLowerCase('ru').includes(query));
