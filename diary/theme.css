@@ -32,3 +32,6 @@
 .nutrition-metric strong{font-size:15px;font-weight:500;color:#2c3b29;white-space:nowrap}
 .nutrition-metric small{font-size:10px;font-weight:400;color:#62705b}
 @media(max-width:360px){.recipe-nutrition .entry-values,#recipePortionPreview{gap:5px}.nutrition-metric{padding:10px 6px}.nutrition-metric strong{font-size:13px}.nutrition-metric-label{font-size:9px}}
+#recipeSearch{background:#e9ecea;border:0;box-shadow:none;color:#28352e}
+#recipeSearch::placeholder{color:#68736e}
+#recipeSearch:focus{border:0;box-shadow:0 0 0 2px #899b7b;outline:none}
