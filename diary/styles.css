@@ -34,4 +34,5 @@ html,body{scrollbar-width:none}html::-webkit-scrollbar,body::-webkit-scrollbar{w
 
 .day-row>span:last-child{text-align:right;flex-shrink:0}.day-row>span:first-child{min-width:0}
 
-:root{--dish-name-size:15px}.entry h3,.recipe-card summary strong,#recipePortionTitle{font-family:inherit;font-size:var(--dish-name-size);font-weight:500;line-height:1.35;letter-spacing:normal}
+
+#recipeSearch::placeholder{font-size:15px;font-weight:500;line-height:1.35;letter-spacing:normal}
