@@ -1,5 +1,11 @@
 # Telegram Rich Message statistics
 
+## Follow-up: remove the food table
+
+Phone feedback showed that even a three-column food table stretched each entry into four lines and left large empty areas. Removed the food table entirely: each product is a bold name plus weight, followed by a compact calorie/B/F/C line in the same paragraph. The aligned daily-summary table, bold labels, progress policy and spacing are unchanged.
+
+Nine maintained suites passed. Execution `5879` delivered actual owner data as food paragraphs and exactly one totals table. Maintenance restored to two nodes. Version `72ca5628-87b2-434b-8a42-9f9df2fe02b6`; backup `backups/2026-10-30-before-simple-food-list/stats.json`. Supersedes the previous food-table designs.
+
 ## Follow-up: plain food table, no time and bold nutrient names
 
 Removed the time column and striped table background. Food now has three columns (product, weight, K/B/F/C); calories, protein, fats and carbs occupy separate lines within the nutrient cell instead of wrapping one packed line. Summary labels (Calories, Protein, Fats, Carbs, Fiber) are bold, with their existing emoji outside the bold span. No arbitrary background/color styling was introduced.

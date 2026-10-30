@@ -37,13 +37,13 @@ function statisticsArticle(data, now = new Date()) {
   const totals = table([rows[0],spacer,...rows.slice(1,4),spacer,rows[4]]);
   if (!logs.length) html += '<p>Пока ничего не записано. Напиши, что съел — текстом или голосом.</p>';
   else {
-    let content='<table compact><tr>'+['Продукт','Вес','КБЖУ'].map(label=>'<th align="left">'+label+'</th>').join('')+'</tr>',shown=0;
+    let content='',shown=0;
     for (const row of logs) {
-      const item='<tr><td align="left"><b>'+escape(row.item_name)+'</b></td><td align="left">'+number(row.weight)+' г</td><td align="left">'+number(row.calories,true)+' ккал<br>Б '+number(row.protein)+' г<br>Ж '+number(row.fats)+' г<br>У '+number(row.carbs)+' г</td></tr>';
+      const item='<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</p>';
       if (shown>=140 || html.length+content.length+item.length+totals.length>27000) break;
       content+=item;shown++;
     }
-    html+=content+'</table>';
+    html+=content;
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
   }
   html+='<p>&nbsp;</p>'+totals;

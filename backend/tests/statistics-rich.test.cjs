@@ -7,9 +7,9 @@ const totals=html=>[...html.matchAll(/<table compact>([\s\S]*?)<\/table>/g)].at(
 const nutrientRow=(html,label)=>totals(html).match(/<tr>[\s\S]*?<\/tr>/g).find(row=>row.includes(label));
 let r=run(base),html=r.rich_html;
 assert.match(html,/^<p>📊 <b>Статистика • 30 октября<\/b> 🍴<\/p>/);
-assert.equal((html.match(/<table\b/g)||[]).length,2);
+assert.equal((html.match(/<table\b/g)||[]).length,1);
 assert.doesNotMatch(html,/<hr|<blockquote|<details|<h[1-6]>|приблизительная оценка/);
-assert.doesNotMatch(html,/striped|Время|09:15|14:00/);assert.match(html,/<b>Белки<\/b>/);assert.match(html,/<b>Жиры<\/b>/);assert.match(html,/<b>Углеводы<\/b>/);assert.match(html,/<b>Калории<\/b>/);assert.match(html,/<b>Клетчатка<\/b>/);assert.match(html,/Б 20 г<br>Ж 14 г<br>У 56 г/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img src/);
+assert.doesNotMatch(html,/striped|Время|09:15|14:00|<th\b/);assert.match(html,/<b>Белки<\/b>/);assert.match(html,/<b>Жиры<\/b>/);assert.match(html,/<b>Углеводы<\/b>/);assert.match(html,/<b>Калории<\/b>/);assert.match(html,/<b>Клетчатка<\/b>/);assert.match(html,/430 ккал · Б 20 · Ж 14 · У 56/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img src/);
 assert.ok(html.indexOf('Овсянка')<html.lastIndexOf('<table compact>'));
 assert.doesNotMatch(totals(html),/<th\b/);assert.equal((totals(html).match(/<td align="left">\u00a0<\/td>/g)||[]).length,6);
 assert.match(nutrientRow(html,'Калории'),/🟩🟩⬜⬜<br>Ещё 1[\s\u00a0]018 ккал/);
