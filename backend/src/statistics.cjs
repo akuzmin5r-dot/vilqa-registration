@@ -25,27 +25,27 @@ function statisticsArticle(data, now = new Date()) {
     return color.repeat(filled)+'⬜'.repeat(4-filled);
   };
   const rows = [
-    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true)+' ккал',progress(s.totalCalories,s.dailyCalories,'calories')+'\n'+(diff>=0?'Ещё '+number(diff,true)+' ккал':'Сверх '+number(-diff,true)+' ккал')],
+    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true),progress(s.totalCalories,s.dailyCalories,'calories')+'\n'+(diff>=0?'Ещё '+number(diff,true)+' ккал':'Сверх '+number(-diff,true)+' ккал')],
     ['💪 Белки',number(s.totalProtein)+' / '+number(s.dailyProtein)+' г',progress(s.totalProtein,s.dailyProtein,'protein')],
     ['🥑 Жиры',number(s.totalFats)+' / '+number(s.dailyFats)+' г',progress(s.totalFats,s.dailyFats,'fats')],
     ['🍞 Углеводы',number(s.totalCarbs)+' / '+number(s.dailyCarbs)+' г',progress(s.totalCarbs,s.dailyCarbs,'carbs')],
     ['🌾 Клетчатка',fiberValue.replace(/ г$/,'')+' / '+number(fiberTarget)+' г',pending||partial?'—':progress(fiberTotal,fiberTarget,'fiber')]
   ];
   let html = '<p>📊 <b>Статистика • '+escape(dateLabel)+'</b> 🍴</p><p>&nbsp;</p>';
-  const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map((cell,index)=>{let text=escape(cell).replace(/\n/g,'<br>');if(index===0&&cell.trim())text=text.replace(/^(\S+) (.+)$/,'$1 <b>$2</b>');return '<td align="left">'+text+'</td>';}).join('')+'</tr>').join('')+'</table>';
-  const spacer=['\u00a0','\u00a0','\u00a0'];
-  const totals = table([rows[0],spacer,...rows.slice(1,4),spacer,rows[4]]);
-  html+=totals+'<p>&nbsp;</p>';
+  const table = items => '<table compact bordered>'+items.map(row=>'<tr>'+row.map((cell,index)=>{let text=escape(cell).replace(/\n/g,'<br>');if(index===0&&cell.trim())text=text.replace(/^(\S+) (.+)$/,'$1 <b>$2</b>');return '<td align="left">'+text+'</td>';}).join('')+'</tr>').join('')+'</table>';
+  const totals = table(rows);
+  html+=totals;
   if (!logs.length) html += '<p>Пока ничего не записано. Напиши, что съел — текстом или голосом.</p>';
   else {
     let content='',shown=0,lastTime=null;
     for (const row of logs) {
       const time=String(row.time||'').slice(0,5);
-      const item=(time&&time!==lastTime?'<footer>'+escape(time)+'</footer>':'')+'<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</p>';
+      const item=(lastTime&&time!==lastTime?'<footer>'+escape(lastTime)+'</footer>':'')+'<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</p>';
       if (shown>=140 || html.length+content.length+item.length>27000) break;
       content+=item;shown++;lastTime=time;
     }
-    html+='<details><summary>🍽 Что съедено</summary><blockquote>'+content+'</blockquote>';
+    if(lastTime)content+='<footer>'+escape(lastTime)+'</footer>';
+    html+='<details><summary>Что съедено 🍽</summary><blockquote>'+content+'</blockquote>';
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
     html+='</details>';
   }

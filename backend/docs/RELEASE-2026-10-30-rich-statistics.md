@@ -1,5 +1,11 @@
 # Telegram Rich Message statistics
 
+## Follow-up: bordered compact totals and trailing times
+
+Enabled native table borders; removed blank spacer rows and the blank paragraph before the food disclosure. Calorie actual/target no longer includes the kcal suffix; remaining/excess and food calories retain their units. Summary is `Что съедено 🍽`, using Telegram's native disclosure arrow. Each successive time group ends with its timestamp below the products, rather than above them.
+
+Nine maintained suites passed, including repeated-time placement and five-row totals checks. Execution `5895` verified Telegram's bordered table, exactly five rows, unitless calorie ratio, immediately adjacent details block and a trailing food timestamp. Maintenance restored to two nodes. Version `04d1e01e-4ed9-4235-8d5a-9fee0754aa3a`; backup `backups/2026-10-30-before-bordered-compact-statistics/stats.json`.
+
 ## Follow-up: collapsed food details below totals
 
 Moved the food quotation below the daily-summary table into a closed native details block, `🍽 Что съедено`. Restored timestamps as footer lines inside the quotation, once per successive time group, without arrows or meal labels. Empty days have no empty disclosure. The summary remains unchanged. Updated behavioral tests, observed the expected failure, then regenerated and passed the formatter suite. Execution `5884` verified a closed details block after the table, containing the food quotation and time; maintenance restored to two nodes. Version `ec713e8f-40f7-472a-bd50-746196895943`; backup `backups/2026-10-30-before-collapsed-food-list/stats.json`.
