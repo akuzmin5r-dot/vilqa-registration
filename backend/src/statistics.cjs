@@ -35,18 +35,20 @@ function statisticsArticle(data, now = new Date()) {
   const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map((cell,index)=>{let text=escape(cell).replace(/\n/g,'<br>');if(index===0&&cell.trim())text=text.replace(/^(\S+) (.+)$/,'$1 <b>$2</b>');return '<td align="left">'+text+'</td>';}).join('')+'</tr>').join('')+'</table>';
   const spacer=['\u00a0','\u00a0','\u00a0'];
   const totals = table([rows[0],spacer,...rows.slice(1,4),spacer,rows[4]]);
+  html+=totals+'<p>&nbsp;</p>';
   if (!logs.length) html += '<p>Пока ничего не записано. Напиши, что съел — текстом или голосом.</p>';
   else {
-    let content='',shown=0;
+    let content='',shown=0,lastTime=null;
     for (const row of logs) {
-      const item='<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</p>';
-      if (shown>=140 || html.length+content.length+item.length+totals.length>27000) break;
-      content+=item;shown++;
+      const time=String(row.time||'').slice(0,5);
+      const item=(time&&time!==lastTime?'<footer>'+escape(time)+'</footer>':'')+'<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</p>';
+      if (shown>=140 || html.length+content.length+item.length>27000) break;
+      content+=item;shown++;lastTime=time;
     }
-    html+='<blockquote>'+content+'</blockquote>';
+    html+='<details><summary>🍽 Что съедено</summary><blockquote>'+content+'</blockquote>';
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
+    html+='</details>';
   }
-  html+='<p>&nbsp;</p>'+totals;
   const text='Питание · '+dateLabel+'\n'+balance+'\n'+rows.map(row=>row[0]+': '+row[1]+' · '+row[2]).join('\n')+'\n'+logs.map(row=>escape(row.item_name)+' · '+number(row.weight)+' г · '+number(row.calories,true)+' ккал').join('\n');
   return {chat_id:chatId,date,text,rich_html:html,fiber_pending:pending,show_buttons:true};
 }

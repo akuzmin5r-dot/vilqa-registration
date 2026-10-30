@@ -1,5 +1,9 @@
 # Telegram Rich Message statistics
 
+## Follow-up: collapsed food details below totals
+
+Moved the food quotation below the daily-summary table into a closed native details block, `🍽 Что съедено`. Restored timestamps as footer lines inside the quotation, once per successive time group, without arrows or meal labels. Empty days have no empty disclosure. The summary remains unchanged. Updated behavioral tests, observed the expected failure, then regenerated and passed the formatter suite. Execution `5884` verified a closed details block after the table, containing the food quotation and time; maintenance restored to two nodes. Version `ec713e8f-40f7-472a-bd50-746196895943`; backup `backups/2026-10-30-before-collapsed-food-list/stats.json`.
+
 ## Follow-up: food quotation
 
 Wrapped the compact food paragraphs in one non-collapsible quotation, as requested. The daily summary stays outside it with its existing spacing. Updated the behavioral assertion, observed the expected failure and then regenerated the formatter; the targeted suite passes. Backup: `backups/2026-10-30-before-quoted-food-list/stats.json`.
