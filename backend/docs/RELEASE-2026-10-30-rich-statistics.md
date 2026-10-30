@@ -1,5 +1,11 @@
 # Telegram Rich Message statistics
 
+## Follow-up: plain food table, no time and bold nutrient names
+
+Removed the time column and striped table background. Food now has three columns (product, weight, K/B/F/C); calories, protein, fats and carbs occupy separate lines within the nutrient cell instead of wrapping one packed line. Summary labels (Calories, Protein, Fats, Carbs, Fiber) are bold, with their existing emoji outside the bold span. No arbitrary background/color styling was introduced.
+
+Nine suites passed. Execution `5875` verified actual owner data through Telegram: three food columns, no `is_striped`, individual macro lines and native bold rich-text labels in the summary. Maintenance restored to two nodes. Version `84dac7b1-65e4-403f-8f78-9b8c77f1dcb4`; backup `backups/2026-10-30-before-plain-food-table/stats.json`. Supersedes previous striped/time-column layout.
+
 ## Follow-up: aligned tables, fiber goal and bot-wide button policy
 
 Food is now one compact striped table with separate time, product, weight and K/B/F/C cells. Product names are bold; long names are escaped and whole rows are capped within Telegram limits. The daily summary is one three-column table with full blank spacer rows after calories and before fiber, so all five nutrient rows share column sizing. Native dividers and meal quotations were removed. Calorie balance remains directly under its progress bar.

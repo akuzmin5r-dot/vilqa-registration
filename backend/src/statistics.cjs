@@ -32,14 +32,14 @@ function statisticsArticle(data, now = new Date()) {
     ['🌾 Клетчатка',fiberValue.replace(/ г$/,'')+' / '+number(fiberTarget)+' г',pending||partial?'—':progress(fiberTotal,fiberTarget,'fiber')]
   ];
   let html = '<p>📊 <b>Статистика • '+escape(dateLabel)+'</b> 🍴</p><p>&nbsp;</p>';
-  const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('')+'</table>';
+  const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map((cell,index)=>{let text=escape(cell).replace(/\n/g,'<br>');if(index===0&&cell.trim())text=text.replace(/^(\S+) (.+)$/,'$1 <b>$2</b>');return '<td align="left">'+text+'</td>';}).join('')+'</tr>').join('')+'</table>';
   const spacer=['\u00a0','\u00a0','\u00a0'];
   const totals = table([rows[0],spacer,...rows.slice(1,4),spacer,rows[4]]);
   if (!logs.length) html += '<p>Пока ничего не записано. Напиши, что съел — текстом или голосом.</p>';
   else {
-    let content='<table compact striped><tr>'+['Время','Продукт','Вес','КБЖУ'].map(label=>'<th align="left">'+label+'</th>').join('')+'</tr>',shown=0;
+    let content='<table compact><tr>'+['Продукт','Вес','КБЖУ'].map(label=>'<th align="left">'+label+'</th>').join('')+'</tr>',shown=0;
     for (const row of logs) {
-      const item='<tr><td align="left">'+escape(String(row.time||'').slice(0,5))+'</td><td align="left"><b>'+escape(row.item_name)+'</b></td><td align="left">'+number(row.weight)+' г</td><td align="left">'+number(row.calories,true)+' ккал<br>Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</td></tr>';
+      const item='<tr><td align="left"><b>'+escape(row.item_name)+'</b></td><td align="left">'+number(row.weight)+' г</td><td align="left">'+number(row.calories,true)+' ккал<br>Б '+number(row.protein)+' г<br>Ж '+number(row.fats)+' г<br>У '+number(row.carbs)+' г</td></tr>';
       if (shown>=140 || html.length+content.length+item.length+totals.length>27000) break;
       content+=item;shown++;
     }

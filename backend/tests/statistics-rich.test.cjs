@@ -3,14 +3,14 @@ const w=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../workflows/stats.js
 const code=w.nodes.find(n=>n.name==='📝 Format Stats Message').parameters.jsCode;
 const base={chat_id:123,date:'2026-10-30',timezone:'Europe/Moscow',stats:{totalCalories:1170,dailyCalories:2188,totalProtein:80,dailyProtein:164,totalFats:50,dailyFats:61,totalCarbs:100,dailyCarbs:246},dailyFiber:25,logs:[{id:1,time:'09:15',item_name:'Овсянка <img src=x onerror=alert(1)>',weight:250,calories:430,protein:20,fats:14,carbs:56,fiber:5,fiber_status:'estimated'},{id:2,time:'14:00',item_name:'Курица с рисом',weight:350,calories:740,protein:60,fats:36,carbs:44,fiber:7.4,fiber_status:'estimated'}]};
 const run=data=>new Function('$json',code)(data).json;
-const totals=html=>html.match(/<table compact>([\s\S]*?)<\/table>/)[1];
+const totals=html=>[...html.matchAll(/<table compact>([\s\S]*?)<\/table>/g)].at(-1)[1];
 const nutrientRow=(html,label)=>totals(html).match(/<tr>[\s\S]*?<\/tr>/g).find(row=>row.includes(label));
 let r=run(base),html=r.rich_html;
 assert.match(html,/^<p>📊 <b>Статистика • 30 октября<\/b> 🍴<\/p>/);
 assert.equal((html.match(/<table\b/g)||[]).length,2);
 assert.doesNotMatch(html,/<hr|<blockquote|<details|<h[1-6]>|приблизительная оценка/);
-assert.match(html,/<table compact striped>/);assert.match(html,/<td align="left">09:15<\/td>/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img src/);
-assert.ok(html.indexOf('Овсянка')<html.indexOf('<table compact>'));
+assert.doesNotMatch(html,/striped|Время|09:15|14:00/);assert.match(html,/<b>Белки<\/b>/);assert.match(html,/<b>Жиры<\/b>/);assert.match(html,/<b>Углеводы<\/b>/);assert.match(html,/<b>Калории<\/b>/);assert.match(html,/<b>Клетчатка<\/b>/);assert.match(html,/Б 20 г<br>Ж 14 г<br>У 56 г/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img src/);
+assert.ok(html.indexOf('Овсянка')<html.lastIndexOf('<table compact>'));
 assert.doesNotMatch(totals(html),/<th\b/);assert.equal((totals(html).match(/<td align="left">\u00a0<\/td>/g)||[]).length,6);
 assert.match(nutrientRow(html,'Калории'),/🟩🟩⬜⬜<br>Ещё 1[\s\u00a0]018 ккал/);
 r=run({...base,logs:[]});assert.match(r.rich_html,/Пока ничего не записано/);assert.equal((r.rich_html.match(/<table\b/g)||[]).length,1);
