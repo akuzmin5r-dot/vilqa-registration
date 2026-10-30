@@ -1,5 +1,13 @@
 # Telegram Rich Message statistics
 
+## Follow-up: visible food list
+
+User feedback: the collapsed list hid the essential information and the message looked too sparse. Meals now appear before daily totals, always expanded, with clock headings and quoted product blocks containing weight, calories and B/F/C grams. Added emoji to section headings and nutrient rows. Tables and the existing buttons remain.
+
+Updated the behavioral test first and confirmed failure on the collapsed layout, then changed the canonical formatter and regenerated its workflow. All eight maintained suites pass. Execution `5624` sent actual owner data for October 30 as native rich blocks: chicken and rice are present inside a non-collapsible blockquote before the totals table. Telegram message `4451`; no fictional records and no diary writes. Maintenance restored to its two original nodes. Live code verified against the generated formatter.
+
+Published statistics version: `3bf66d1e-e2db-4d1c-8f84-dc7649350bab`. Backup: workspace `backups/2026-10-30-before-visible-statistics/stats.json`. This section supersedes the original collapsed-list layout below.
+
 Daily statistics now use Telegram's native Rich Message format: a heading, integer calories and remaining amount, a compact B/F/C/fiber table, and collapsed meal details. Values come from the existing database snapshot; no model is involved. The existing diary, recommendation and main-menu buttons remain, including their styles. The intentional delay after saving food remains.
 
 Both the main bot and Mini App recipe-portion notification use this format. A plain text summary remains available for the recommendation workflow. User text is escaped; long days are truncated by complete items within Telegram character/block limits, with a link via the diary button. Pending, incomplete, manual and estimated fiber values remain distinct.
