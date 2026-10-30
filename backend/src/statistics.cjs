@@ -43,7 +43,7 @@ function statisticsArticle(data, now = new Date()) {
       if (shown>=140 || html.length+content.length+item.length+totals.length>27000) break;
       content+=item;shown++;
     }
-    html+=content;
+    html+='<blockquote>'+content+'</blockquote>';
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
   }
   html+='<p>&nbsp;</p>'+totals;

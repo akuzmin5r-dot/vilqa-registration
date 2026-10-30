@@ -1,5 +1,9 @@
 # Telegram Rich Message statistics
 
+## Follow-up: food quotation
+
+Wrapped the compact food paragraphs in one non-collapsible quotation, as requested. The daily summary stays outside it with its existing spacing. Updated the behavioral assertion, observed the expected failure and then regenerated the formatter; the targeted suite passes. Backup: `backups/2026-10-30-before-quoted-food-list/stats.json`.
+
 ## Follow-up: remove the food table
 
 Phone feedback showed that even a three-column food table stretched each entry into four lines and left large empty areas. Removed the food table entirely: each product is a bold name plus weight, followed by a compact calorie/B/F/C line in the same paragraph. The aligned daily-summary table, bold labels, progress policy and spacing are unchanged.
