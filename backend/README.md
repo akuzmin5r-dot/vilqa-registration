@@ -14,6 +14,8 @@
 
 Для браузерного сценария: `npm --prefix backend install`, затем `npm --prefix backend run test:ui`. На текущем Windows используется установленный Edge. Запись порции проверяется вместе с потерей ответа и повтором того же request_id: создаётся ровно одна запись.
 
+Для проверки Safari: `node backend/node_modules/playwright/cli.js install webkit`, затем `npm --prefix backend run test:webkit`. Геометрия панели проверяется на ширинах 320, 390, 440 и 560 CSS px; 440 CSS px соответствует портретному viewport iPhone 16 Pro Max. WebKit на компьютере воспроизводит CSS-движок, но не заменяет проверку на физическом iPhone.
+
 Изменяйте общие функции в `src/`, затем выполняйте `npm --prefix backend run generate`. Проверка `check:generated` выявляет расхождение модулей и workflow. Тесты больше не используют старые draft JSON из временных папок.
 
 ## Доставка клетчатки
