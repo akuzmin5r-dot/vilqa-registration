@@ -1,5 +1,11 @@
 # Telegram Rich Message statistics
 
+## Follow-up: native dividers and plain heading
+
+Replaced the article heading with a standard bold paragraph, `📊 Статистика • [date] 🍴`. Meal timestamps now end with the Unicode down arrow. Totals use three headerless tables (calories, B/F/C, fiber) separated by two native dividers. Remaining calories are a native footer directly below the calorie table, providing secondary typography controlled by the Telegram client/theme; the API has no custom opacity/color option. Separate tables may size their columns independently in clients.
+
+Updated behavioral tests first, observed the expected failure, then regenerated the canonical workflow. Eight maintained suites passed. Execution `5645`, message `4454`: actual owner data delivered; Telegram returned a bold paragraph, timestamp footer `11:12 ↓`, three tables, two dividers and the separate remainder footer. No diary writes. Maintenance restored to two nodes and live formatter verified against local code. Published statistics version `2a6d0593-5152-4dc0-a564-19370d3e3969`; backup in workspace `backups/2026-10-30-before-statistics-dividers/stats.json`. This layout supersedes earlier notes below.
+
 ## Follow-up: headerless table and calorie progress
 
 Removed table headers. Calories now have the same four-square progress indicator as the other rows; the remaining calories appear below it in the same cell as `Ещё … ккал`, or `Сверх … ккал` for excess. Cell text remains escaped before newline-to-break conversion. Existing meal blocks and nutrient semantics are unchanged.
