@@ -1,5 +1,11 @@
 # Telegram Rich Message statistics
 
+## Follow-up: headerless table and calorie progress
+
+Removed table headers. Calories now have the same four-square progress indicator as the other rows; the remaining calories appear below it in the same cell as `Ещё … ккал`, or `Сверх … ккал` for excess. Cell text remains escaped before newline-to-break conversion. Existing meal blocks and nutrient semantics are unchanged.
+
+Behavior test updated first and failed as expected, then the canonical formatter and generated workflow were updated. Eight maintained suites passed. Execution `5639` delivered actual owner data; Telegram confirmed no header cells and a multiline calorie progress/remainder cell. Maintenance returned to two nodes; live formatter matches local source. Published version `098f7b1a-fd65-4b5d-9ef7-fef47f3a0ac6`; backup in workspace `backups/2026-10-30-before-headerless-statistics/stats.json`. This layout supersedes the previous notes below.
+
 ## Follow-up: compact table and timestamps
 
 Removed meal-count headings, meal-type labels, standalone time headings and the fiber disclaimer. Time is now a small footer inside each meal quotation. One compact table contains calories (actual / target, remaining or excess in column three) and nutrient rows (actual / target, four-square progress in column three). All header cells explicitly align left. Known zero, unknown and pending fiber stay distinct; pending/incomplete fiber has no progress estimate. Protein uses yellow below 70%, then green; fats/carbs use yellow over 100% and red over 120%, matching the previous statistics semantics. Fiber progress stays green toward its target.

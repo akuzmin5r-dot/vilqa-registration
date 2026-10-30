@@ -24,14 +24,14 @@ function statisticsArticle(data, now = new Date()) {
     return color.repeat(filled)+'⬜'.repeat(4-filled);
   };
   const rows = [
-    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true)+' ккал',diff>=0?'Осталось '+number(diff,true):'Сверх '+number(-diff,true)],
+    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true)+' ккал',progress(s.totalCalories,s.dailyCalories,'calories')+'\n'+(diff>=0?'Ещё '+number(diff,true)+' ккал':'Сверх '+number(-diff,true)+' ккал')],
     ['💪 Белки',number(s.totalProtein)+' / '+number(s.dailyProtein)+' г',progress(s.totalProtein,s.dailyProtein,'protein')],
     ['🥑 Жиры',number(s.totalFats)+' / '+number(s.dailyFats)+' г',progress(s.totalFats,s.dailyFats,'fats')],
     ['🍞 Углеводы',number(s.totalCarbs)+' / '+number(s.dailyCarbs)+' г',progress(s.totalCarbs,s.dailyCarbs,'carbs')],
     ['🌾 Клетчатка',fiberValue.replace(/ г$/,'')+' / '+number(fiberTarget)+' г',pending||partial?'—':progress(fiberTotal,fiberTarget,'fiber')]
   ];
   let html = '<h1>📊 Питание · '+escape(dateLabel)+'</h1>';
-  const totals = '<table compact><tr><th align="left">Показатель</th><th align="left">За день / норма</th><th align="left">Баланс</th></tr>'+rows.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell)+'</td>').join('')+'</tr>').join('')+'</table>';
+  const totals = '<table compact>'+rows.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('')+'</table>';
   const groups = new Map();
   for (const row of logs) {
     const key = row.draft_id || row.time || String(row.id);
