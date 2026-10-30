@@ -1,5 +1,13 @@
 # Telegram Rich Message statistics
 
+## Follow-up: progress logic audit and spacing
+
+Audit found conflicting yellow semantics (low protein versus excess calories/fats/carbs) and rounding that displayed four squares at 87.5%. All calorie/B/F/C rows now share green through 100%, yellow above 100% through 120%, red above 120%. These are UI thresholds, not health-risk judgments. Fiber remains green toward/above its target and suppresses progress for pending/incomplete data. Filled squares represent completed 25% increments (`floor`, capped at four), so zero filled squares can mean less than 25%, not missing records; exact numbers remain visible.
+
+Restored the remaining calories directly under the calorie progress bar in its cell. Removed the timestamp arrow, keeping time before food inside its quotation. Added one blank paragraph after the title and one before the calorie table. Retained native dividers.
+
+Updated behavioral tests first and observed failure, then regenerated the workflow. Eight maintained suites passed; new integration assertions cover all calorie/B/F/C rows at 0%, 24.9%, 25%, 50%, 75%, 99.9%, 100%, 101%, 120% and 120.1%. Execution `5649`, message `4455`, confirmed actual owner data, both spacer paragraphs and the multiline calorie cell in Telegram. Maintenance restored to two nodes and published source verified against local formatter. Version `977353eb-fcb1-4362-a6e9-bac1a6d36fb3`; backup `backups/2026-10-30-before-progress-audit/stats.json`. Supersedes earlier layout/color notes.
+
 ## Follow-up: native dividers and plain heading
 
 Replaced the article heading with a standard bold paragraph, `📊 Статистика • [date] 🍴`. Meal timestamps now end with the Unicode down arrow. Totals use three headerless tables (calories, B/F/C, fiber) separated by two native dividers. Remaining calories are a native footer directly below the calorie table, providing secondary typography controlled by the Telegram client/theme; the API has no custom opacity/color option. Separate tables may size their columns independently in clients.

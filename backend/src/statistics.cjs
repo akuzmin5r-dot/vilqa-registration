@@ -19,21 +19,21 @@ function statisticsArticle(data, now = new Date()) {
   const balance = diff>=0 ? 'Осталось '+number(diff,true)+' ккал' : 'Выше ориентира на '+number(-diff,true)+' ккал';
   const progress = (value,target,kind) => {
     if (!(Number(target)>0)) return '—';
-    const ratio=Number(value)/Number(target),filled=Math.min(4,Math.max(0,Math.round(ratio*4)));
-    const color=kind==='protein' ? (ratio<0.7?'🟨':'🟩') : kind==='fiber' ? '🟩' : ratio>1.2?'🟥':ratio>1?'🟨':'🟩';
+    const ratio=Number(value)/Number(target),filled=Math.min(4,Math.max(0,Math.floor(ratio*4)));
+    // UI thresholds, not a nutritional risk assessment. Fiber is a target, not a ceiling.
+    const color=kind==='fiber' ? '🟩' : ratio>1.2?'🟥':ratio>1?'🟨':'🟩';
     return color.repeat(filled)+'⬜'.repeat(4-filled);
   };
   const rows = [
-    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true)+' ккал',progress(s.totalCalories,s.dailyCalories,'calories')],
+    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true)+' ккал',progress(s.totalCalories,s.dailyCalories,'calories')+'\n'+(diff>=0?'Ещё '+number(diff,true)+' ккал':'Сверх '+number(-diff,true)+' ккал')],
     ['💪 Белки',number(s.totalProtein)+' / '+number(s.dailyProtein)+' г',progress(s.totalProtein,s.dailyProtein,'protein')],
     ['🥑 Жиры',number(s.totalFats)+' / '+number(s.dailyFats)+' г',progress(s.totalFats,s.dailyFats,'fats')],
     ['🍞 Углеводы',number(s.totalCarbs)+' / '+number(s.dailyCarbs)+' г',progress(s.totalCarbs,s.dailyCarbs,'carbs')],
     ['🌾 Клетчатка',fiberValue.replace(/ г$/,'')+' / '+number(fiberTarget)+' г',pending||partial?'—':progress(fiberTotal,fiberTarget,'fiber')]
   ];
-  let html = '<p>📊 <b>Статистика • '+escape(dateLabel)+'</b> 🍴</p>';
-  const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell)+'</td>').join('')+'</tr>').join('')+'</table>';
-  const remaining = diff>=0?'Ещё '+number(diff,true)+' ккал':'Сверх '+number(-diff,true)+' ккал';
-  const totals = table(rows.slice(0,1))+'<footer>'+escape(remaining)+'</footer><hr/>'+table(rows.slice(1,4))+'<hr/>'+table(rows.slice(4));
+  let html = '<p>📊 <b>Статистика • '+escape(dateLabel)+'</b> 🍴</p><p>&nbsp;</p>';
+  const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('')+'</table>';
+  const totals = table(rows.slice(0,1))+'<hr/>'+table(rows.slice(1,4))+'<hr/>'+table(rows.slice(4));
   const groups = new Map();
   for (const row of logs) {
     const key = row.draft_id || row.time || String(row.id);
@@ -45,7 +45,7 @@ function statisticsArticle(data, now = new Date()) {
     let content='', shown=0;
     for (const group of groups.values()) {
       const time=String(group[0].time || '').slice(0,5);
-      const heading = time ? '<footer>'+escape(time)+' ↓</footer>' : '';
+      const heading = time ? '<footer>'+escape(time)+'</footer>' : '';
       let items='';
       for (const row of group) {
         const item='<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' г · Ж '+number(row.fats)+' г · У '+number(row.carbs)+' г</p>';
@@ -58,7 +58,7 @@ function statisticsArticle(data, now = new Date()) {
     html+=content;
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
   }
-  html+=totals;
+  html+='<p>&nbsp;</p>'+totals;
   const text='Питание · '+dateLabel+'\n'+balance+'\n'+rows.map(row=>row[0]+': '+row[1]+' · '+row[2]).join('\n')+'\n'+logs.map(row=>escape(row.item_name)+' · '+number(row.weight)+' г · '+number(row.calories,true)+' ккал').join('\n');
   return {chat_id:chatId,date,text,rich_html:html,fiber_pending:pending,show_buttons:true};
 }
