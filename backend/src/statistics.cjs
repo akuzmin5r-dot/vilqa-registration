@@ -17,9 +17,21 @@ function statisticsArticle(data, now = new Date()) {
   const fiberValue = pending ? 'Считаю…' : partial ? (known.length ? '≈ '+number(fiberTotal)+' г · неполные данные' : 'Данные неполные') : '≈ '+number(fiberTotal)+' г';
   const diff = Math.round(s.dailyCalories)-Math.round(s.totalCalories);
   const balance = diff>=0 ? 'Осталось '+number(diff,true)+' ккал' : 'Выше ориентира на '+number(-diff,true)+' ккал';
-  const rows = [['💪 Белки',number(s.totalProtein)+' г',number(s.dailyProtein)+' г'],['🥑 Жиры',number(s.totalFats)+' г',number(s.dailyFats)+' г'],['🍞 Углеводы',number(s.totalCarbs)+' г',number(s.dailyCarbs)+' г'],['🌾 Клетчатка',fiberValue,number(fiberTarget)+' г']];
+  const progress = (value,target,kind) => {
+    if (!(Number(target)>0)) return '—';
+    const ratio=Number(value)/Number(target),filled=Math.min(4,Math.max(0,Math.round(ratio*4)));
+    const color=kind==='protein' ? (ratio<0.7?'🟨':'🟩') : kind==='fiber' ? '🟩' : ratio>1.2?'🟥':ratio>1?'🟨':'🟩';
+    return color.repeat(filled)+'⬜'.repeat(4-filled);
+  };
+  const rows = [
+    ['🔥 Калории',number(s.totalCalories,true)+' / '+number(s.dailyCalories,true)+' ккал',diff>=0?'Осталось '+number(diff,true):'Сверх '+number(-diff,true)],
+    ['💪 Белки',number(s.totalProtein)+' / '+number(s.dailyProtein)+' г',progress(s.totalProtein,s.dailyProtein,'protein')],
+    ['🥑 Жиры',number(s.totalFats)+' / '+number(s.dailyFats)+' г',progress(s.totalFats,s.dailyFats,'fats')],
+    ['🍞 Углеводы',number(s.totalCarbs)+' / '+number(s.dailyCarbs)+' г',progress(s.totalCarbs,s.dailyCarbs,'carbs')],
+    ['🌾 Клетчатка',fiberValue.replace(/ г$/,'')+' / '+number(fiberTarget)+' г',pending||partial?'—':progress(fiberTotal,fiberTarget,'fiber')]
+  ];
   let html = '<h1>📊 Питание · '+escape(dateLabel)+'</h1>';
-  const totals = '<h2>🎯 Итого за день</h2><p>🔥 <b>'+number(s.totalCalories,true)+' из '+number(s.dailyCalories,true)+' ккал</b><br>'+balance+'</p><table compact><tr><th>Показатель</th><th>За день</th><th>Ориентир</th></tr>'+rows.map(row=>'<tr>'+row.map(cell=>'<td>'+escape(cell)+'</td>').join('')+'</tr>').join('')+'</table>';
+  const totals = '<table compact><tr><th align="left">Показатель</th><th align="left">За день / норма</th><th align="left">Баланс</th></tr>'+rows.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell)+'</td>').join('')+'</tr>').join('')+'</table>';
   const groups = new Map();
   for (const row of logs) {
     const key = row.draft_id || row.time || String(row.id);
@@ -30,21 +42,22 @@ function statisticsArticle(data, now = new Date()) {
   else {
     let content='', shown=0;
     for (const group of groups.values()) {
-      const heading = '<h3>🕒 '+escape(String(group[0].time || '').slice(0,5))+(group[0].meal_type ? ' · '+escape(group[0].meal_type) : '')+'</h3>';
+      const time=String(group[0].time || '').slice(0,5);
+      const heading = time ? '<footer>'+escape(time)+'</footer>' : '';
       let items='';
       for (const row of group) {
         const item='<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' г · Ж '+number(row.fats)+' г · У '+number(row.carbs)+' г</p>';
         if (shown>=140 || html.length+content.length+heading.length+items.length+item.length+totals.length>27000) break;
         items+=item; shown++;
       }
-      if (items) content+=heading+'<blockquote>'+items+'</blockquote>';
+      if (items) content+='<blockquote>'+heading+items+'</blockquote>';
       if (shown>=140 || (shown<logs.length && html.length+content.length+totals.length>26000)) break;
     }
-    html+='<h2>🍽 Приёмы пищи · '+groups.size+'</h2>'+content;
+    html+=content;
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
   }
-  html+=totals+'<footer>🌾 Клетчатка — приблизительная оценка.'+(pending ? ' Итог придёт отдельным сообщением.' : '')+'</footer>';
-  const text='Питание · '+dateLabel+'\n'+number(s.totalCalories,true)+' из '+number(s.dailyCalories,true)+' ккал\n'+balance+'\n'+rows.map(row=>row[0]+': '+row[1]+' / '+row[2]).join('\n')+'\n'+logs.map(row=>escape(row.item_name)+' · '+number(row.weight)+' г · '+number(row.calories,true)+' ккал').join('\n');
+  html+=totals;
+  const text='Питание · '+dateLabel+'\n'+balance+'\n'+rows.map(row=>row[0]+': '+row[1]+' · '+row[2]).join('\n')+'\n'+logs.map(row=>escape(row.item_name)+' · '+number(row.weight)+' г · '+number(row.calories,true)+' ккал').join('\n');
   return {chat_id:chatId,date,text,rich_html:html,fiber_pending:pending,show_buttons:true};
 }
 module.exports = {statisticsArticle};

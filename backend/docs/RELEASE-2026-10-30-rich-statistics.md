@@ -1,5 +1,13 @@
 # Telegram Rich Message statistics
 
+## Follow-up: compact table and timestamps
+
+Removed meal-count headings, meal-type labels, standalone time headings and the fiber disclaimer. Time is now a small footer inside each meal quotation. One compact table contains calories (actual / target, remaining or excess in column three) and nutrient rows (actual / target, four-square progress in column three). All header cells explicitly align left. Known zero, unknown and pending fiber stay distinct; pending/incomplete fiber has no progress estimate. Protein uses yellow below 70%, then green; fats/carbs use yellow over 100% and red over 120%, matching the previous statistics semantics. Fiber progress stays green toward its target.
+
+Updated the formatter behavior test first and observed the expected failure, then changed the canonical source and regenerated the statistics node. Eight maintained suites passed, including progress overflow/zero checks. Execution `5634`, Telegram message `4452`: actual October 30 owner data delivered successfully; Telegram returned left-aligned header cells, four-square bars, and the timestamp footer nested inside a blockquote. Maintenance restored to two nodes; published formatter compared against local code. No diary changes.
+
+Published statistics version: `d607f04b-e1ee-414d-b59b-6b3a6ad565ef`. Backup: workspace `backups/2026-10-30-before-compact-statistics/stats.json`. This section supersedes previous layout notes below.
+
 ## Follow-up: visible food list
 
 User feedback: the collapsed list hid the essential information and the message looked too sparse. Meals now appear before daily totals, always expanded, with clock headings and quoted product blocks containing weight, calories and B/F/C grams. Added emoji to section headings and nutrient rows. Tables and the existing buttons remain.
