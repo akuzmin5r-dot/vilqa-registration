@@ -1,0 +1,7 @@
+{
+ "name":"vilqa-backend",
+ "private":true,
+ "version":"1.0.0",
+ "scripts":{"test":"node tools/test.cjs","test:ui":"node tools/test.cjs --ui","generate":"node tools/generate-workflows.cjs","check:generated":"node tools/generate-workflows.cjs --check"},
+ "devDependencies":{"playwright":"1.64.1"}
+}

@@ -1,0 +1,427 @@
+{
+  "id": "TsulPDrTQqZT2xaNtKBRW",
+  "name": "VILQA AI Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "748ac025-4c0b-4c4b-8ad8-3b0c9054adea",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        336,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "safe-text",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-workflow_name",
+              "name": "workflow_name",
+              "value": "={{ $json.workflow_name }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-error_message",
+              "name": "error_message",
+              "value": "={{ $json.error_message }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-last_node",
+              "name": "last_node",
+              "value": "={{ $json.last_node }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-execution_id",
+              "name": "execution_id",
+              "value": "={{ $json.execution_id }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-execution_url",
+              "name": "execution_url",
+              "value": "={{ $json.execution_url }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-mode",
+              "name": "mode",
+              "value": "={{ $json.mode }}",
+              "type": "string"
+            },
+            {
+              "id": "safe-time",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "66550b69-7a54-4476-a451-c0e203b7770c",
+      "name": "📋 Format Error Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "180753266",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML",
+          "disable_web_page_preview": true
+        }
+      },
+      "id": "399d62ae-a37b-45ea-b9b7-acbd1baddea4",
+      "name": "🚨 Alert Admin (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        -48
+      ],
+      "webhookId": "a3f4d571-2e51-4149-9d38-71dba54afdca",
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "telegramApi": {
+          "id": "cxpP4210lq4DP6VB",
+          "name": "VILQA AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Контроль ошибок VILQA\n\nError Trigger: неперехваченные сбои бота, API и статистики.\nHandled Failure Trigger: явно перехваченные ошибки сохранения и внешних сервисов.\n\nПолучатель: администратор 180753266.\nВ Telegram и error_logs — только технические метаданные, без сообщений пользователей, initData и стеков.\nЖурнал не блокирует отправку уведомления.\nСамоссылка errorWorkflow удалена.",
+        "height": 392,
+        "width": 532,
+        "color": 7
+      },
+      "id": "2bef5a4c-aedb-4a20-8496-305137e6403b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "nJcVqlLFuY1AFaY5",
+          "cachedResultName": "error_logs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "workflow_name": "={{ $('📋 Format Error Data').first().json.workflow_name }}",
+            "error_message": "={{ $('📋 Format Error Data').first().json.error_message }}",
+            "last_node": "={{ $('📋 Format Error Data').first().json.last_node }}",
+            "execution_id": "={{ $('📋 Format Error Data').first().json.execution_id }}",
+            "execution_url": "={{ $('📋 Format Error Data').first().json.execution_url }}",
+            "timestamp": "={{ $('📋 Format Error Data').first().json.timestamp }}",
+            "mode": "={{ $('📋 Format Error Data').first().json.mode }}",
+            "alert_delivered": "={{ $json.ok === true && Number.isSafeInteger($json.result?.message_id) }}",
+            "telegram_message_id": "={{ $json.result?.message_id || 0 }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "c405fbc5-2201-4178-9493-14caef4e78d6",
+      "name": "📝 Log Error to DB",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        768,
+        160
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Optional: Create 'error_logs' data table to store error history"
+    },
+    {
+      "id": "4c179f14-b5bf-4609-a7de-841327ad6e6e",
+      "name": "Sanitize Error Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        48
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const WORKFLOWS={\"f0dMmWk0Mte7utYu\":\"VILQA — клетчатка\",\"a08kQaFjSLUxlmpNlmV2J\":\"VILQA — бот\",\"ZRjTZf8Dejt-wZDny90_8\":\"VILQA — статистика\",\"9c44CeVZqqmXNebA\":\"VILQA — Mini App API\",\"J4XikahpZkt8KYXo\":\"ПРОВЕРКА мониторинга VILQA\"};\nconst EVENTS={\"model_output_invalid\":\"Ответ AI не прошёл проверку формата\",\"access_storage\":\"Не удалось проверить доступ к VILQA\",\"registration_storage\":\"Не удалось сохранить регистрацию\",\"meal_commit\":\"Не удалось подтвердить запись еды\",\"diary_storage\":\"Ошибка чтения или сохранения дневника\",\"voice_processing\":\"Не удалось обработать голосовое сообщение\",\"profile_notification_claim\":\"Не удалось подготовить уведомление об изменении профиля\",\"profile_notification_delivery\":\"Не удалось доставить уведомление об изменении профиля\",\"profile_notification_status\":\"Не удалось сохранить результат доставки уведомления\",\"meal_notification\":\"Не удалось отправить подтверждение записи еды\",\"meal_stats\":\"Не удалось отправить статистику после записи еды\"};\nfunction errorAlert(data) {\n  const id=String(data?.workflow?.id||data?.workflow_id||'');\n  if(!WORKFLOWS[id])return null;\n  const execution=data.execution||{};\n  const executionId=String(execution.id||data.execution_id||'');\n  const err=execution.error||data.trigger?.error||{};\n  const raw=String(err.message||'');\n  const category=/429|rate.?limit|too many requests/i.test(raw)?'Ограничение частоты запросов':/timeout|timed out|ETIMEDOUT/i.test(raw)?'Превышено время ожидания':/credential|unauthorized|forbidden|401|403/i.test(raw)?'Доступ или авторизация':/connect|database|postgres|ECONN/i.test(raw)?'Соединение или база данных':'Технический сбой';\n  const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n  const stage=String(execution.lastNodeExecuted||data.stage||data.trigger?.error?.node?.name||'Запуск workflow').slice(0,100);\n  const title=EVENTS[data.event]||'Workflow завершился с ошибкой';\n  const link=/^\\d{1,20}$/.test(executionId)?`https://n8n.svoidigital.ru/workflow/${id}/executions/${executionId}`:`https://n8n.svoidigital.ru/workflow/${id}`;\n  return {chat_id:180753266,text:`🚨 <b>${esc(title)}</b>\\n\\n${esc(WORKFLOWS[id])}\\nУзел: <code>${esc(stage)}</code>\\nТип: ${esc(category)}${executionId&&/^\\d{1,20}$/.test(executionId)?'\\nВыполнение: <code>'+executionId+'</code>':''}\\n\\n<a href=\"${link}\">Открыть в n8n</a>`,workflow_id:id,workflow_name:WORKFLOWS[id],error_message:title+' · '+category,last_node:stage,execution_url:link,mode:EVENTS[data.event]?'handled':'unhandled',execution_id:/^\\d{1,20}$/.test(executionId)?executionId:'',event:EVENTS[data.event]?data.event:'unhandled'};\n}\nconst result=errorAlert($input.first().json);return result?[{json:result}]:[];\r\n"
+      }
+    },
+    {
+      "id": "47032252-c3fc-4242-bf5d-b36dd81d2ab2",
+      "name": "Handled Failure Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        320
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "7c26c57f-619a-4501-bceb-3023a98a28ee",
+      "name": "Release Failed Navigation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        450,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT vilqa.nav_release_failed($1::text) AS released;",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ [String($json.execution_id || '')] }}"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "postgres": {
+          "id": "LjpwMBUFrespnzSR",
+          "name": "Postgres FIX"
+        }
+      }
+    },
+    {
+      "id": "495a4480-b653-4b97-9d51-80e055d30121",
+      "name": "Restore Sanitized Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        650,
+        0
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ $('Sanitize Error Metadata').first().json }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "b4d69ee6-9ca2-4b80-879a-6b16f54cc849",
+      "name": "Статус · убрать после сбоя",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        600,
+        600
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "pU5WQmFMlj3fc7fa"
+        },
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phase": "abort",
+            "user_id": 0,
+            "kind": "stats",
+            "owner": "={{ $json.execution_id || '0' }}",
+            "scope": "",
+            "payload": {}
+          },
+          "schema": [
+            {
+              "id": "phase",
+              "displayName": "phase",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "number",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "kind",
+              "displayName": "kind",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scope",
+              "displayName": "scope",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "object",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "notes": "Убирает статус и возвращает исходные данные без изменений.",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "📋 Format Error Data": {
+      "main": [
+        [
+          {
+            "node": "🚨 Alert Admin (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Sanitize Error Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handled Failure Trigger": {
+      "main": [
+        [
+          {
+            "node": "Sanitize Error Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚨 Alert Admin (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "📝 Log Error to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitize Error Metadata": {
+      "main": [
+        [
+          {
+            "node": "Release Failed Navigation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Статус · убрать после сбоя",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Failed Navigation": {
+      "main": [
+        [
+          {
+            "node": "Restore Sanitized Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Sanitized Error": {
+      "main": [
+        [
+          {
+            "node": "📋 Format Error Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [
+    {
+      "id": "76388b70-4cbb-47b6-b0a2-76ca2c49a768",
+      "name": "Очистка временных статусов",
+      "nodeNames": [
+        "Статус · убрать после сбоя"
+      ],
+      "description": "Остановить анимацию и удалить сообщения только сбойного выполнения"
+    }
+  ],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Moscow",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "binaryMode": "separate",
+    "saveManualExecutions": false,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none"
+  },
+  "activeVersionId": "507d68c2-3389-425d-9e81-1d859b3886a4"
+}

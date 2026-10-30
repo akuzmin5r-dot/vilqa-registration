@@ -328,9 +328,10 @@ document.querySelectorAll('dialog').forEach(dialog=>{
  dialog.addEventListener('close',()=>{backdropPointer=null;});
 });
 
-let fiberPollTimer=null,fiberPollKey='',fiberPollCount=0;
-const fiberObserver=new MutationObserver(()=>{clearTimeout(fiberPollTimer);if(!['day','admin'].includes(state.tab)||document.hidden)return;const key=state.user+':'+state.date;if(key!==fiberPollKey){fiberPollKey=key;fiberPollCount=0;}if(state.entries.some(e=>!e.deleted_at&&e.fiber_status==='pending')&&fiberPollCount<12){fiberPollTimer=setTimeout(()=>{if(!document.hidden&&!state.busy&&['day','admin'].includes(state.tab)){fiberPollCount++;refreshFiberDay();}},5000);}});
+const fiberPoller=window.createFiberPoller({snapshot:()=>({key:state.user+':'+state.date,pending:state.entries.filter(e=>!e.deleted_at&&e.fiber_status==='pending').map(e=>e.id+':'+e.version),enabled:['day','admin'].includes(state.tab)&&!document.hidden&&!state.busy}),refresh:refreshFiberDay});
+const fiberObserver=new MutationObserver(()=>fiberPoller.sync());
 fiberObserver.observe($('#dayContent'),{childList:true});
+document.addEventListener('visibilitychange',()=>fiberPoller.sync());
 
 async function refreshFiberDay(){
  const user=state.user,date=state.date,id=state.loadId,epoch=cacheEpoch,deleted=state.deleted;

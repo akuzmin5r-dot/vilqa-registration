@@ -1,0 +1,770 @@
+{
+  "id": "pU5WQmFMlj3fc7fa",
+  "name": "VILQA — Статусы и анимация",
+  "nodes": [
+    {
+      "id": "61e83ffd-4be3-4de4-bd76-03bfe9905650",
+      "name": "Управление статусом",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        288
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "phase",
+              "type": "string"
+            },
+            {
+              "name": "user_id",
+              "type": "number"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "owner",
+              "type": "string"
+            },
+            {
+              "name": "scope",
+              "type": "string"
+            },
+            {
+              "name": "payload",
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6501fc8b-2e62-444a-94e3-e42f56fecce3",
+      "name": "Проверить команду статуса",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        288
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const x=$input.first().json,labels={food:'Думаю',stats:'Считаю статистику',recommendations:'Готовлю рекомендации',recipe:'Считаю рецепт',voice:'Распознаю голос',fiber:'Считаю клетчатку'};if(!['begin','end','animate','abort'].includes(x.phase)||!String(x.owner||'').match(/^[A-Za-z0-9_-]{1,80}$/))throw Error('Invalid status command');if(x.phase!=='abort'&&(!Number.isSafeInteger(Number(x.user_id))||Number(x.user_id)<=0||!labels[x.kind]))throw Error('Invalid status user or kind');return [{json:{phase:x.phase,user_id:Number(x.user_id)||0,kind:x.kind||'',owner:String(x.owner),scope:String(x.scope||'').slice(0,10000),payload:x.payload||{},label:labels[x.kind]||''}}];"
+      }
+    },
+    {
+      "id": "fc9a5104-5bc1-4392-bc22-e495230e487e",
+      "name": "Выбрать действие",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        256
+      ],
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 4,
+        "output": "={{ ['begin','end','animate','abort'].indexOf($json.phase) }}"
+      }
+    },
+    {
+      "id": "7016a9b9-f1ab-42c0-ae71-35854f31cb14",
+      "name": "Начало · занять действие",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        720,
+        128
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT x AS op FROM vilqa.status_begin($1::bigint,$2,$3,$4) x;",
+        "options": {
+          "queryReplacement": "={{ [$json.user_id,$json.kind,$json.scope,$json.owner] }}",
+          "largeNumbersOutput": "numbers"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "LjpwMBUFrespnzSR",
+          "name": "Postgres FIX"
+        }
+      }
+    },
+    {
+      "id": "7d18bcda-e703-4d20-8df0-a346418e42f2",
+      "name": "Начало · показать сообщение",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        128
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.op.user_id }}",
+        "text": "={{ $('Проверить команду статуса').first().json.label + '...' }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": true
+        }
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "06a0f5f2-eb5a-42f6-b1f0-67159b42ac06",
+      "credentials": {
+        "telegramApi": {
+          "id": "cxpP4210lq4DP6VB",
+          "name": "VILQA AI"
+        }
+      }
+    },
+    {
+      "id": "0c36e6f0-4521-4642-aab1-367f5a63b0fa",
+      "name": "Начало · запомнить сообщение",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1168,
+        128
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT vilqa.status_attach($1::bigint,$2,$3,$4,$5::bigint) AS op;",
+        "options": {
+          "queryReplacement": "={{ [$('Начало · занять действие').first().json.op.user_id,$('Начало · занять действие').first().json.op.kind,$('Начало · занять действие').first().json.op.scope,$('Начало · занять действие').first().json.op.owner_execution,Number($json.message_id || $json.result?.message_id || 0)] }}",
+          "largeNumbersOutput": "numbers"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "LjpwMBUFrespnzSR",
+          "name": "Postgres FIX"
+        }
+      }
+    },
+    {
+      "id": "f72e18ca-aa87-4491-926a-b6864a77c08c",
+      "name": "Вернуть исходные данные",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        128
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:$('Проверить команду статуса').first().json.payload}];"
+      }
+    },
+    {
+      "id": "1a90614a-daad-4ff7-89b0-5c7ebae64d08",
+      "name": "Конец · освободить действие",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        720,
+        400
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT vilqa.status_finish($1::bigint,$2,$3,$4) AS op;",
+        "options": {
+          "queryReplacement": "={{ [$json.user_id,$json.kind,$json.scope,$json.owner] }}",
+          "largeNumbersOutput": "numbers"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "LjpwMBUFrespnzSR",
+          "name": "Postgres FIX"
+        }
+      }
+    },
+    {
+      "id": "408f522e-5331-4330-8560-f2b29833a2df",
+      "name": "Есть сообщение для удаления?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        944,
+        400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ Number($json.op?.message_id)>0 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "41190bab-12df-478b-ba6c-d427a9295d3b",
+      "name": "Конец · удалить сообщение",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        320
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "deleteMessage",
+        "chatId": "={{ $json.op.user_id }}",
+        "messageId": "={{ String($json.op.message_id) }}"
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "22fa51ba-a707-490b-9bbe-bd0c7070d6d6",
+      "credentials": {
+        "telegramApi": {
+          "id": "cxpP4210lq4DP6VB",
+          "name": "VILQA AI"
+        }
+      }
+    },
+    {
+      "id": "0f4ffc80-9bf6-4e65-b38b-bbb1529566c1",
+      "name": "Продолжить основной ответ",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:$('Проверить команду статуса').first().json.payload}];"
+      }
+    },
+    {
+      "id": "89b1d44d-0d38-4eae-be5d-e5f850067027",
+      "name": "Анимация · интервал 2 секунды",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        640
+      ],
+      "parameters": {
+        "amount": "={{ Math.max(2,Math.min(60,Number(String($json.error?.message || $json.error || '').match(/retry.?after\\D*(\\d+)/i)?.[1] || 0))) }}",
+        "unit": "seconds"
+      },
+      "webhookId": "8a83bcb1-f6fb-4fe1-987e-9fd3c4782ac2"
+    },
+    {
+      "id": "8b9453b1-14ef-4030-8b57-11bf39b50366",
+      "name": "Анимация · проверить действие",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        944,
+        560
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT x AS op FROM vilqa.status_tick($1::bigint,$2,$3,$4) x;",
+        "options": {
+          "queryReplacement": "={{ [$('Проверить команду статуса').first().json.user_id,$('Проверить команду статуса').first().json.kind,$('Проверить команду статуса').first().json.scope,$('Проверить команду статуса').first().json.owner] }}",
+          "largeNumbersOutput": "numbers"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "LjpwMBUFrespnzSR",
+          "name": "Postgres FIX"
+        }
+      }
+    },
+    {
+      "id": "93c1ccb3-642e-42d6-abf7-9fa81e81ae32",
+      "name": "Истекло время статуса?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1168,
+        560
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.op.expired === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "bf871169-1318-40b9-a236-6be352990417",
+      "name": "Анимация · убрать просроченное",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1392,
+        512
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "deleteMessage",
+        "chatId": "={{ $json.op.user_id }}",
+        "messageId": "={{ String($json.op.message_id) }}"
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "d1a2227c-8569-4abc-b4df-7363c8ee5a12",
+      "credentials": {
+        "telegramApi": {
+          "id": "cxpP4210lq4DP6VB",
+          "name": "VILQA AI"
+        }
+      }
+    },
+    {
+      "id": "59868557-5308-4194-bb63-da68198f3f93",
+      "name": "Анимация · изменить точки",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1392,
+        736
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "editMessageText",
+        "messageType": "message",
+        "chatId": "={{ $json.op.user_id }}",
+        "messageId": "={{ String($json.op.message_id) }}",
+        "text": "={{ $('Проверить команду статуса').first().json.label + '.'.repeat($json.op.frame) }}",
+        "additionalFields": {}
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "76144d07-9b88-4f81-baca-c7fc07bd8265",
+      "credentials": {
+        "telegramApi": {
+          "id": "cxpP4210lq4DP6VB",
+          "name": "VILQA AI"
+        }
+      }
+    },
+    {
+      "id": "23a23d92-bf35-49a9-af46-38a434110ce9",
+      "name": "Сбой · освободить статусы",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        720,
+        704
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT x AS op FROM vilqa.status_abort($1) x WHERE (x->>'message_id')::bigint>0;",
+        "options": {
+          "queryReplacement": "={{ [$json.owner] }}",
+          "largeNumbersOutput": "numbers"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "LjpwMBUFrespnzSR",
+          "name": "Postgres FIX"
+        }
+      }
+    },
+    {
+      "id": "f736df79-1484-4eb2-95b1-8b8e1cc27d61",
+      "name": "Сбой · убрать сообщение",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        704
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "deleteMessage",
+        "chatId": "={{ $json.op.user_id }}",
+        "messageId": "={{ String($json.op.message_id) }}"
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "540b6ac4-158a-402e-a256-40b51ad3367f",
+      "credentials": {
+        "telegramApi": {
+          "id": "cxpP4210lq4DP6VB",
+          "name": "VILQA AI"
+        }
+      }
+    },
+    {
+      "id": "28afdd63-b5da-4a28-af20-c684e6acfc0c",
+      "name": "Начало · запустить анимацию",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        850,
+        0
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "pU5WQmFMlj3fc7fa"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phase": "animate",
+            "user_id": "={{ $('Начало · запомнить сообщение').first().json.op.user_id }}",
+            "kind": "={{ $('Начало · запомнить сообщение').first().json.op.kind }}",
+            "owner": "={{ $('Начало · запомнить сообщение').first().json.op.owner_execution }}",
+            "scope": "={{ $('Начало · запомнить сообщение').first().json.op.scope }}",
+            "payload": {}
+          },
+          "schema": [
+            {
+              "id": "phase",
+              "displayName": "phase",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "number",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "kind",
+              "displayName": "kind",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scope",
+              "displayName": "scope",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "object",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "notes": "Один фоновый цикл редактирует сообщение; main запрос не ждёт анимацию."
+    }
+  ],
+  "connections": {
+    "Управление статусом": {
+      "main": [
+        [
+          {
+            "node": "Проверить команду статуса",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверить команду статуса": {
+      "main": [
+        [
+          {
+            "node": "Выбрать действие",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Выбрать действие": {
+      "main": [
+        [
+          {
+            "node": "Начало · занять действие",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Конец · освободить действие",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Анимация · интервал 2 секунды",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Сбой · освободить статусы",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Начало · занять действие": {
+      "main": [
+        [
+          {
+            "node": "Начало · показать сообщение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Начало · показать сообщение": {
+      "main": [
+        [
+          {
+            "node": "Начало · запомнить сообщение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Конец · освободить действие": {
+      "main": [
+        [
+          {
+            "node": "Есть сообщение для удаления?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Есть сообщение для удаления?": {
+      "main": [
+        [
+          {
+            "node": "Конец · удалить сообщение",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Продолжить основной ответ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Конец · удалить сообщение": {
+      "main": [
+        [
+          {
+            "node": "Продолжить основной ответ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Анимация · интервал 2 секунды": {
+      "main": [
+        [
+          {
+            "node": "Анимация · проверить действие",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Анимация · проверить действие": {
+      "main": [
+        [
+          {
+            "node": "Истекло время статуса?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Истекло время статуса?": {
+      "main": [
+        [
+          {
+            "node": "Анимация · убрать просроченное",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Анимация · изменить точки",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Анимация · изменить точки": {
+      "main": [
+        [
+          {
+            "node": "Анимация · интервал 2 секунды",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сбой · освободить статусы": {
+      "main": [
+        [
+          {
+            "node": "Сбой · убрать сообщение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Начало · запомнить сообщение": {
+      "main": [
+        [
+          {
+            "node": "Начало · запустить анимацию",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Начало · запустить анимацию": {
+      "main": [
+        [
+          {
+            "node": "Вернуть исходные данные",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [
+    {
+      "id": "2c64ab33-5d1f-4850-979a-044fdd663a75",
+      "name": "Начало действия",
+      "nodeNames": [
+        "Начало · занять действие",
+        "Начало · показать сообщение",
+        "Начало · запомнить сообщение",
+        "Начало · запустить анимацию",
+        "Вернуть исходные данные"
+      ],
+      "description": "Одно сообщение и один запуск; анимация отдельно; входные данные возвращаются без изменений"
+    },
+    {
+      "id": "5af9968a-d02f-4451-86e6-71926619c81e",
+      "name": "Завершение",
+      "nodeNames": [
+        "Конец · освободить действие",
+        "Есть сообщение для удаления?",
+        "Конец · удалить сообщение",
+        "Продолжить основной ответ"
+      ],
+      "description": "Освобождает действие, удаляет статус и возвращает исходные данные"
+    },
+    {
+      "id": "7b975f5b-4c4b-475f-bcc2-d13dcde03610",
+      "name": "Анимация точек",
+      "nodeNames": [
+        "Анимация · интервал 2 секунды",
+        "Анимация · проверить действие",
+        "Истекло время статуса?",
+        "Анимация · изменить точки",
+        "Анимация · убрать просроченное"
+      ],
+      "description": "Редактирует одно сообщение раз в 2 секунды, останавливается после завершения или по сроку"
+    },
+    {
+      "id": "883dcfd4-c7a5-4f65-b66c-10ad2ff1a24e",
+      "name": "Очистка после сбоя",
+      "nodeNames": [
+        "Сбой · освободить статусы",
+        "Сбой · убрать сообщение"
+      ],
+      "description": "Удаляет статусы конкретного выполнения, не затрагивая другие запросы"
+    }
+  ],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "executionTimeout": 330,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "activeVersionId": "3a944794-2dd4-418e-8e97-85fc0f0f6e73"
+}

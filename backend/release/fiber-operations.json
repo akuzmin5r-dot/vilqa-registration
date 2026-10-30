@@ -1,0 +1,110 @@
+[
+  {
+    "type": "updateNodeParameters",
+    "nodeName": "02 · Проверить кэш и состав",
+    "replace": true,
+    "parameters": {
+      "mode": "runOnceForAllItems",
+      "jsCode": "function prepareFiber(job){\n if(!job||!Array.isArray(job.items)||job.items.length>30)throw Error('Invalid fiber job');\n const values=[],unknown=[];\n for(const item of job.items){\n  const base={id:Number(item.id),signature:item.signature};\n  if(typeof item.fiber==='number'&&Number.isFinite(item.fiber))values.push({...base,fiber:item.fiber});\n  else if(typeof item.cached_per100==='number'&&Number.isFinite(item.cached_per100)&&(item.recipe||!/(?:хлеб|батон|булоч|печенье|торт|колбас|сосиск|батончик)/i.test(item.name||'')))values.push({...base,fiber:Math.round(item.cached_per100*item.weight/100*10)/10});\n  else unknown.push({id:Number(item.id),name:item.name,weight:item.weight,calories:item.calories,protein:item.protein,fats:item.fats,carbs:item.carbs,recipe:item.recipe||null});\n }\n return {job,values,unknown,needs_model:unknown.length>0,prompt:JSON.stringify({items:unknown})};\n}\nreturn [{json:prepareFiber($input.first().json.job)}];"
+    }
+  },
+  {
+    "type": "updateNodeParameters",
+    "nodeName": "07 · Защитить от повторной отправки",
+    "replace": true,
+    "parameters": {
+      "operation": "executeQuery",
+      "query": "SELECT value AS notice FROM vilqa.fiber_queue_notice($1::jsonb) value;",
+      "options": {
+        "queryReplacement": "={{ [JSON.stringify($json.text ? $json : null)] }}",
+        "largeNumbersOutput": "numbers"
+      }
+    }
+  },
+  {
+    "type": "setNodeSettings",
+    "nodeName": "08 · Отправить клетчатку в Telegram",
+    "settings": {
+      "onError": "continueRegularOutput"
+    }
+  },
+  {
+    "type": "updateNodeParameters",
+    "nodeName": "09 · Сохранить доставку",
+    "replace": true,
+    "parameters": {
+      "operation": "executeQuery",
+      "query": "SELECT vilqa.fiber_finish_notice($1::jsonb,$2::jsonb) AS delivery;",
+      "options": {
+        "queryReplacement": "={{ [JSON.stringify($('07 · Защитить от повторной отправки').first().json.notice),JSON.stringify($json)] }}",
+        "largeNumbersOutput": "numbers"
+      }
+    }
+  },
+  {
+    "type": "addNode",
+    "node": {
+      "name": "10 · Проверить подтверждение Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const result=$input.first().json.delivery;if(['unknown','failed'].includes(result?.state))throw Error('Fiber Telegram delivery '+result.state+'; inspect vilqa.fiber_deliveries');return $input.all();"
+      }
+    }
+  },
+  {
+    "type": "addConnection",
+    "source": "Резерв · проверять очередь раз в минуту",
+    "sourceIndex": 0,
+    "target": "07 · Защитить от повторной отправки",
+    "targetIndex": 0,
+    "connectionType": "main"
+  },
+  {
+    "type": "addConnection",
+    "source": "09 · Сохранить доставку",
+    "sourceIndex": 0,
+    "target": "10 · Проверить подтверждение Telegram",
+    "targetIndex": 0,
+    "connectionType": "main"
+  },
+  {
+    "type": "setNodeGroups",
+    "nodeGroups": [
+      {
+        "id": "b08bcc34-a7a3-4992-bfe2-0e1f62322b0b",
+        "name": "Расчёт и сохранение",
+        "nodeNames": [
+          "01 · Взять задачу из очереди",
+          "02 · Проверить кэш и состав",
+          "Нужен расчёт ИИ?",
+          "Модель · оценка клетчатки",
+          "03 · Оценить клетчатку продуктов",
+          "04 · Проверить ответ модели",
+          "04 · Использовать готовый расчёт",
+          "05 · Обновить записи и итог дня",
+          "Статус · начать клетчатку",
+          "Статус · закончить клетчатку",
+          "Уведомлять о новом приёме?",
+          "Закрыть статус нового приёма?"
+        ],
+        "description": "Удаление и правки пересчитываются без статуса и сообщений. Новый приём получает статус и уведомление."
+      },
+      {
+        "id": "ef7b5d24-4134-4d96-87d4-0d5d06978ba0",
+        "name": "Итог и доставка",
+        "nodeNames": [
+          "07 · Защитить от повторной отправки",
+          "08 · Отправить клетчатку в Telegram",
+          "09 · Сохранить доставку",
+          "10 · Проверить подтверждение Telegram"
+        ],
+        "description": "Очередь уведомлений → аренда отправки → Telegram → подтверждение. Явные отказы повторяются, неопределённый исход требует проверки."
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+BEGIN;
+DO $test$
+DECLARE u bigint:=8000000000000001;p jsonb;r jsonb;edited jsonb;entry bigint;aud bigint;req jsonb;v integer;
+BEGIN
+ INSERT INTO vilqa.access_members(user_id,granted_by) VALUES(u,180753266);
+ p:=jsonb_build_object('user_id',u,'name','PROFILE TIME TEST','timezone','Europe/Moscow','weight',80,'daily_calories',2200,'daily_protein',130,'daily_fats',70,'daily_carbs',260);
+ r:=vilqa.ensure_profile(p);IF r->>'daily_calories'<>'2200' THEN RAISE EXCEPTION 'Legacy target changed';END IF;
+ IF (SELECT count(*) FROM vilqa.profile_audit WHERE user_id=u)<>1 THEN RAISE EXCEPTION 'Missing import audit';END IF;
+ PERFORM vilqa.ensure_profile(p);IF (SELECT count(*) FROM vilqa.profile_audit WHERE user_id=u)<>1 THEN RAISE EXCEPTION 'Duplicate migration';END IF;
+ UPDATE vilqa.profiles SET data=data||'{"name":"FRESH","weight":81,"daily_calories":2300}',version=5 WHERE user_id=u;
+ r:=vilqa.ensure_profile(p);IF r->>'weight'<>'81' OR r->>'name'<>'FRESH' OR r->>'daily_calories'<>'2300' OR r->>'profile_version'<>'5' THEN RAISE EXCEPTION 'Fresh profile overwritten';END IF;
+ UPDATE vilqa.profiles SET data=data-'daily_carbs' WHERE user_id=u;
+ r:=vilqa.ensure_profile(p);IF r->>'daily_carbs'<>'260' OR r->>'weight'<>'81' OR r->>'profile_version'<>'6' THEN RAISE EXCEPTION 'Missing fields not filled safely';END IF;
+ INSERT INTO vilqa.diary(user_id,date,time,datetime,meal_type,item_type,item_name,weight,calories,protein,fats,carbs) VALUES(u,'2026-10-25','23:59','2026-10-25T20:59:59Z','перекус','product','TIME TEST',100,100,1,2,3) RETURNING id INTO entry;
+ req:=jsonb_build_object('action','edit','id',entry,'user_id',u,'version',1,'request_id','test-time-edit-0001','patch',jsonb_build_object('item_name','TIME TEST','weight',100,'calories',100,'protein',1,'fats',2,'carbs',3,'date','2026-10-26','time','07:30'));
+ r:=vilqa.private_api(u,req,jsonb_build_array(p));IF r->>'success'<>'true' OR r->'entry'->>'date'<>'2026-10-26' OR r->'entry'->>'time'<>'07:30' OR r->'entry'->>'datetime'<>'2026-10-26T04:30:00Z' OR r->'entry'->>'meal_type'<>'завтрак' THEN RAISE EXCEPTION 'Date move failed: %',r;END IF;edited:=r;
+ r:=vilqa.private_api(u,req,jsonb_build_array(p));IF r<>edited OR (SELECT count(*) FROM vilqa.audit WHERE entry_id=entry)<>1 THEN RAISE EXCEPTION 'Edit replay duplicated';END IF;
+ r:=vilqa.private_api(u,jsonb_build_object('action','day','date','2026-10-25'),jsonb_build_array(p));IF r->'totals'->>'count'<>'0' THEN RAISE EXCEPTION 'Old day still includes moved entry';END IF;
+ r:=vilqa.private_api(u,jsonb_build_object('action','day','date','2026-10-26'),jsonb_build_array(p));IF r->'totals'->>'count'<>'1' THEN RAISE EXCEPTION 'New day missing entry';END IF;
+ SELECT id INTO aud FROM vilqa.audit WHERE entry_id=entry AND action='edit';
+ r:=vilqa.private_api(u,jsonb_build_object('action','revert','id',entry,'user_id',u,'version',2,'audit_id',aud,'request_id','test-time-revert-01'),jsonb_build_array(p));
+ IF r->>'success'<>'true' OR r->'entry'->>'datetime'<>'2026-10-25T20:59:59Z' OR r->'entry'->>'time'<>'23:59' THEN RAISE EXCEPTION 'Original instant not restored';END IF;
+ r:=vilqa.private_api(u,req||jsonb_build_object('request_id','test-time-stale-01'),jsonb_build_array(p));IF r->>'status'<>'409' THEN RAISE EXCEPTION 'Stale edit accepted';END IF;
+ r:=vilqa.private_api(u,req||jsonb_build_object('version',3,'request_id','test-time-bad-date','patch',(req->'patch')||'{"date":"2026-02-30"}'),jsonb_build_array(p));IF r->>'status'<>'400' THEN RAISE EXCEPTION 'Invalid date accepted';END IF;
+ r:=vilqa.private_api(u,req||jsonb_build_object('version',3,'request_id','test-time-bad-time','patch',(req->'patch')||'{"time":"24:00"}'),jsonb_build_array(p));IF r->>'status'<>'400' THEN RAISE EXCEPTION 'Invalid time accepted';END IF;
+ r:=vilqa.private_api(u+1,req||jsonb_build_object('version',3,'request_id','test-time-other-01'),jsonb_build_array(p));IF r->>'status'<>'403' THEN RAISE EXCEPTION 'Foreign edit accepted';END IF;
+ IF (SELECT version FROM vilqa.diary WHERE id=entry)<>3 OR (SELECT count(*) FROM vilqa.audit WHERE entry_id=entry)<>2 THEN RAISE EXCEPTION 'Rejected edit changed state';END IF;
+ BEGIN PERFORM vilqa.diary_time_patch('{"date":"2026-03-08","time":"02:30"}','{}','America/New_York');RAISE EXCEPTION 'DST gap accepted';EXCEPTION WHEN invalid_parameter_value THEN NULL;END;
+END $test$;
+SELECT 'Profile merge, chronology, ownership, replay, versioning and audit tests passed; rolled back' AS result;
+ROLLBACK;

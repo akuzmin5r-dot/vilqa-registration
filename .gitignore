@@ -1,0 +1,8 @@
+node_modules/
+backend/node_modules/
+backend/dev/
+backend/.metrics/
+backend/target/
+backend/archive/
+*.log
+__pycache__/
