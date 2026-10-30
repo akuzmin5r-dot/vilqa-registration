@@ -2106,8 +2106,11 @@
     },
     {
       "parameters": {
+        "resource": "message",
+        "operation": "sendRichMessage",
         "chatId": "={{ $('Нормализовать событие Telegram').first().json.user_id }}",
-        "text": "={{ $json.message }}",
+        "richFormat": "html",
+        "richMessageText": "={{ $json.rich_html }}",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -2119,7 +2122,8 @@
                     "additionalFields": {
                       "web_app": {
                         "url": "https://akuzmin5r-dot.github.io/vilqa-registration/diary/?v=access-1"
-                      }
+                      },
+                      "style": "primary"
                     }
                   }
                 ]
@@ -2131,7 +2135,8 @@
                   {
                     "text": " 💡 Рекомендация",
                     "additionalFields": {
-                      "callback_data": "menu_recommendation"
+                      "callback_data": "menu_recommendation",
+                      "style": "success"
                     }
                   },
                   {
@@ -2145,10 +2150,7 @@
             }
           ]
         },
-        "additionalFields": {
-          "appendAttribution": false,
-          "parse_mode": "HTML"
-        }
+        "additionalFields": {}
       },
       "id": "27d81ccf-42e9-4102-b2ab-3bfb64ec9a3c",
       "name": "📤 Send Stats",
@@ -2565,16 +2567,8 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "47014463-b407-44da-a0e3-29fea8b6b592",
-              "name": "today_stats",
-              "value": "={{ $json.text }}",
-              "type": "string"
-            }
-          ]
-        },
+        "mode": "raw",
+        "jsonOutput": "={{ {...$json,today_stats:$json.text} }}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -3465,7 +3459,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function telegramChunks(raw, limit = 3500) {\n  const escape = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  const text = String(raw ?? '').replace(/<br\\s*\\/?\\s*>/gi, '\\n').replace(/<\\/?(?:p|div)>/gi, '\\n').replace(/<\\/?span[^>]*>/gi, '');\n  const tokens = text.match(/<\\/?(?:b|i|code|blockquote)>|&(?:amp|lt|gt|quot|apos|#\\d+|#x[\\da-f]+);|[\\s\\S]/giu) || [];\n  const stack = [], chunks = [];\n  const close = () => stack.slice().reverse().map(tag => '</' + tag + '>').join('');\n  const open = () => stack.map(tag => '<' + tag + '>').join('');\n  let current = '', hasText = false;\n  const flush = () => { if (hasText) chunks.push(current + close()); current = open(); hasText = false; };\n  for (let token of tokens) {\n    const tag = token.match(/^<(\\/?)(b|i|code|blockquote)>$/i);\n    if (tag) {\n      const name = tag[2].toLowerCase();\n      if (tag[1]) {\n        if (stack[stack.length - 1] !== name) continue;\n        current += '</' + stack.pop() + '>';\n      } else if (stack.length < 8) {\n        if (current.length + token.length + close().length + name.length + 3 > limit) flush();\n        current += '<' + name + '>'; stack.push(name);\n      }\n      continue;\n    }\n    if (token === '&' || token === '<' || token === '>') token = escape(token);\n    if (current.length + token.length + close().length > limit) flush();\n    current += token; hasText = true;\n  }\n  flush();\n  return chunks.length ? chunks : ['Сообщение пустое. Попробуйте ещё раз.'];\n}\nreturn telegramChunks($input.first().json.today_stats).map(message=>({json:{message},pairedItem:{item:0}}));"
+        "jsCode": "const data=$input.first().json;if(!data.rich_html)throw new Error('Rich statistics content is missing');return [{json:data,pairedItem:{item:0}}];"
       },
       "id": "5694c5c5-87d8-4091-84c2-b256fc52f06b",
       "name": "Split Stats Message",

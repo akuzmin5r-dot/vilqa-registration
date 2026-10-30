@@ -1181,7 +1181,7 @@
         2600
       ],
       "parameters": {
-        "jsCode": "function telegramChunks(raw, limit = 3500) {\n  const escape = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  const text = String(raw ?? '').replace(/<br\\s*\\/?\\s*>/gi, '\\n').replace(/<\\/?(?:p|div)>/gi, '\\n').replace(/<\\/?span[^>]*>/gi, '');\n  const tokens = text.match(/<\\/?(?:b|i|code|blockquote)>|&(?:amp|lt|gt|quot|apos|#\\d+|#x[\\da-f]+);|[\\s\\S]/giu) || [];\n  const stack = [], chunks = [];\n  const close = () => stack.slice().reverse().map(tag => '</' + tag + '>').join('');\n  const open = () => stack.map(tag => '<' + tag + '>').join('');\n  let current = '', hasText = false;\n  const flush = () => { if (hasText) chunks.push(current + close()); current = open(); hasText = false; };\n  for (let token of tokens) {\n    const tag = token.match(/^<(\\/?)(b|i|code|blockquote)>$/i);\n    if (tag) {\n      const name = tag[2].toLowerCase();\n      if (tag[1]) {\n        if (stack[stack.length - 1] !== name) continue;\n        current += '</' + stack.pop() + '>';\n      } else if (stack.length < 8) {\n        if (current.length + token.length + close().length + name.length + 3 > limit) flush();\n        current += '<' + name + '>'; stack.push(name);\n      }\n      continue;\n    }\n    if (token === '&' || token === '<' || token === '>') token = escape(token);\n    if (current.length + token.length + close().length > limit) flush();\n    current += token; hasText = true;\n  }\n  flush();\n  return chunks.length ? chunks : ['Сообщение пустое. Попробуйте ещё раз.'];\n}\nreturn telegramChunks($input.first().json.text).map(message=>({json:{message,chat_id:$('Статистика порции · контекст').first().json.user_id},pairedItem:{item:0}}));"
+        "jsCode": "const data=$input.first().json;if(!data.rich_html)throw new Error('Rich statistics content is missing');return [{json:data,pairedItem:{item:0}}];"
       },
       "onError": "continueErrorOutput"
     },
@@ -1195,8 +1195,11 @@
         2600
       ],
       "parameters": {
+        "resource": "message",
+        "operation": "sendRichMessage",
         "chatId": "={{ $json.chat_id }}",
-        "text": "={{ $json.message }}",
+        "richFormat": "html",
+        "richMessageText": "={{ $json.rich_html }}",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -1237,10 +1240,7 @@
             }
           ]
         },
-        "additionalFields": {
-          "appendAttribution": false,
-          "parse_mode": "HTML"
-        }
+        "additionalFields": {}
       },
       "onError": "continueErrorOutput",
       "webhookId": "578fb93d-260c-4ba4-828b-afc8f6619177",
