@@ -251,7 +251,7 @@
                       "web_app": {
                         "url": "https://akuzmin5r-dot.github.io/vilqa-registration/diary/?v=clean-1&tab=profile"
                       },
-                      "style": "success"
+                      "style": ""
                     }
                   }
                 ]
@@ -931,7 +931,7 @@
                       "web_app": {
                         "url": "={{ $('Подготовить подтверждение порции').first().json.diary_url }}"
                       },
-                      "style": "primary"
+                      "style": "success"
                     }
                   }
                 ]
@@ -1212,7 +1212,7 @@
                       "web_app": {
                         "url": "={{ 'https://akuzmin5r-dot.github.io/vilqa-registration/diary/?date='+$('Статистика порции · контекст').first().json.date }}"
                       },
-                      "style": "primary"
+                      "style": "success"
                     }
                   }
                 ]
@@ -1225,7 +1225,7 @@
                     "text": " 💡 Рекомендация",
                     "additionalFields": {
                       "callback_data": "menu_recommendation",
-                      "style": "success"
+                      "style": ""
                     }
                   },
                   {

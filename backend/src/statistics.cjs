@@ -19,9 +19,9 @@ function statisticsArticle(data, now = new Date()) {
   const balance = diff>=0 ? 'Осталось '+number(diff,true)+' ккал' : 'Выше ориентира на '+number(-diff,true)+' ккал';
   const progress = (value,target,kind) => {
     if (!(Number(target)>0)) return '—';
-    const ratio=Number(value)/Number(target),filled=Math.min(4,Math.max(0,Math.floor(ratio*4)));
+    const ratio=Number(value)/Number(target),filled=kind==='fiber'&&ratio>0?Math.min(4,Math.ceil(ratio*4)):Math.min(4,Math.max(0,Math.floor(ratio*4)));
     // UI thresholds, not a nutritional risk assessment. Fiber is a target, not a ceiling.
-    const color=kind==='fiber' ? '🟩' : ratio>1.2?'🟥':ratio>1?'🟨':'🟩';
+    const color=kind==='fiber' ? (ratio>=1?'🟩':ratio>=0.5?'🟨':'🟥') : ratio>1.2?'🟥':ratio>1?'🟨':'🟩';
     return color.repeat(filled)+'⬜'.repeat(4-filled);
   };
   const rows = [
@@ -33,29 +33,17 @@ function statisticsArticle(data, now = new Date()) {
   ];
   let html = '<p>📊 <b>Статистика • '+escape(dateLabel)+'</b> 🍴</p><p>&nbsp;</p>';
   const table = items => '<table compact>'+items.map(row=>'<tr>'+row.map(cell=>'<td align="left">'+escape(cell).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('')+'</table>';
-  const totals = table(rows.slice(0,1))+'<hr/>'+table(rows.slice(1,4))+'<hr/>'+table(rows.slice(4));
-  const groups = new Map();
-  for (const row of logs) {
-    const key = row.draft_id || row.time || String(row.id);
-    if (!groups.has(key)) groups.set(key,[]);
-    groups.get(key).push(row);
-  }
+  const spacer=['\u00a0','\u00a0','\u00a0'];
+  const totals = table([rows[0],spacer,...rows.slice(1,4),spacer,rows[4]]);
   if (!logs.length) html += '<p>Пока ничего не записано. Напиши, что съел — текстом или голосом.</p>';
   else {
-    let content='', shown=0;
-    for (const group of groups.values()) {
-      const time=String(group[0].time || '').slice(0,5);
-      const heading = time ? '<footer>'+escape(time)+'</footer>' : '';
-      let items='';
-      for (const row of group) {
-        const item='<p><b>'+escape(row.item_name)+'</b> · '+number(row.weight)+' г<br>'+number(row.calories,true)+' ккал · Б '+number(row.protein)+' г · Ж '+number(row.fats)+' г · У '+number(row.carbs)+' г</p>';
-        if (shown>=140 || html.length+content.length+heading.length+items.length+item.length+totals.length>27000) break;
-        items+=item; shown++;
-      }
-      if (items) content+='<blockquote>'+heading+items+'</blockquote>';
-      if (shown>=140 || (shown<logs.length && html.length+content.length+totals.length>26000)) break;
+    let content='<table compact striped><tr>'+['Время','Продукт','Вес','КБЖУ'].map(label=>'<th align="left">'+label+'</th>').join('')+'</tr>',shown=0;
+    for (const row of logs) {
+      const item='<tr><td align="left">'+escape(String(row.time||'').slice(0,5))+'</td><td align="left"><b>'+escape(row.item_name)+'</b></td><td align="left">'+number(row.weight)+' г</td><td align="left">'+number(row.calories,true)+' ккал<br>Б '+number(row.protein)+' · Ж '+number(row.fats)+' · У '+number(row.carbs)+'</td></tr>';
+      if (shown>=140 || html.length+content.length+item.length+totals.length>27000) break;
+      content+=item;shown++;
     }
-    html+=content;
+    html+=content+'</table>';
     if (shown<logs.length) html+='<p>Все записи доступны в дневнике.</p>';
   }
   html+='<p>&nbsp;</p>'+totals;

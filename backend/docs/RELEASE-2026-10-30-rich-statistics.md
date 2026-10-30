@@ -1,5 +1,19 @@
 # Telegram Rich Message statistics
 
+## Follow-up: aligned tables, fiber goal and bot-wide button policy
+
+Food is now one compact striped table with separate time, product, weight and K/B/F/C cells. Product names are bold; long names are escaped and whole rows are capped within Telegram limits. The daily summary is one three-column table with full blank spacer rows after calories and before fiber, so all five nutrient rows share column sizing. Native dividers and meal quotations were removed. Calorie balance remains directly under its progress bar.
+
+Fiber is a goal-oriented meter: known zero is four white squares; any positive amount fills at least one square; below 50% is red, from 50% to below 100% is yellow, at/above 100% is green. Filled fiber squares use ceiling to show that measurement has begun. Calorie/B/F/C progress retains completed-quarter filling and its previous excess thresholds. Pending or incomplete fiber has no estimated progress bar.
+
+Button styling is generated from `src/button-policy.cjs` for every Telegram inline keyboard in the main and API workflows. Diary opening and write/save actions are green; cancellation is red; everything else is default, including delete, registration, profile and recommendations. Dynamic expressions evaluate the same classifier against actual rendered labels and callback actions, including revision-prefixed callbacks. The outgoing style is authoritative and overrides historical styles in cached navigation payloads; no database migration is needed. Policy saved in n8n user preferences (`e70e1c28-ccf5-443d-8b27-da42aa13bed6`). Other active workflows were inspected and have no inline keyboards.
+
+Nine maintained suites passed, including generated-style drift, dynamic expression execution, diary/cancel/default scenarios and fiber boundaries at 0, 0.1, 25, 49.9, 50, 75, 99.9, 100 and 150 percent. All 30 modified node configurations validated. Execution `5811`, message `4456`, confirmed native striped food rows, the single aligned totals table with blank rows and red partial fiber, plus green diary/default recommendations. Dynamic keyboard message `4457` confirmed green save, red cancel and an unstyled statistics button; it was deleted after verification in execution `5814`. Maintenance returned to its original two nodes. Published parameters compared with local canonical exports. No diary data changed.
+
+Versions: main `e6f28dd7-84e5-4ca8-89ce-61fa2777cc31`, API `b343f0fe-8abd-4cc2-8568-4c7deccb6b4f`, statistics `5a0c7a47-1e2c-4919-8d75-a6b8edd3ea52`. Backups: workspace `backups/2026-10-30-before-tables-buttons/`.
+
+Telegram offers compact/bordered/striped table properties, but no arbitrary background color. The stripe color is chosen by the client/theme, not the VILQA brand palette. This section supersedes earlier table, fiber and button styling descriptions.
+
 ## Follow-up: progress logic audit and spacing
 
 Audit found conflicting yellow semantics (low protein versus excess calories/fats/carbs) and rounding that displayed four squares at 87.5%. All calorie/B/F/C rows now share green through 100%, yellow above 100% through 120%, red above 120%. These are UI thresholds, not health-risk judgments. Fiber remains green toward/above its target and suppresses progress for pending/incomplete data. Filled squares represent completed 25% increments (`floor`, capped at four), so zero filled squares can mean less than 25%, not missing records; exact numbers remain visible.

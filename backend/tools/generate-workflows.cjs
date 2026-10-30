@@ -1,5 +1,6 @@
 const fs=require('fs'),path=require('path');
 const base=path.resolve(__dirname,'..'),fiber=require('../src/fiber.cjs'),telegram=require('../src/telegram.cjs'),statistics=require('../src/statistics.cjs');
+const buttons=require('../src/button-policy.cjs');
 function replacePrefix(code,marker,prefix){const at=code.indexOf(marker);if(at<0)throw Error('Missing wrapper '+marker);return prefix+'\n'+code.slice(at+1);}
 function desired(kind,node){const code=node.parameters.jsCode;
  if(kind==='stats'&&node.name==='📝 Format Stats Message')return statistics.statisticsArticle.toString()+'\nreturn {json:statisticsArticle($json)};';
@@ -18,6 +19,7 @@ function desired(kind,node){const code=node.parameters.jsCode;
 }
 function run(check=false){let changed=0;for(const kind of ['main','fiber','api','stats']){
  const file=path.join(base,'workflows',kind+'.json'),w=JSON.parse(fs.readFileSync(file,'utf8'));
+ for(const n of w.nodes.filter(n=>n.type==='n8n-nodes-base.telegram'))if(buttons.applyButtonPolicy(n)){changed++;if(check)throw Error('Button policy drift: '+kind+'/'+n.name);}
  for(const n of w.nodes){if(n.type!=='n8n-nodes-base.code')continue;const code=desired(kind,n);new Function(code);if(code!==n.parameters.jsCode){changed++;if(check)throw Error('Generated code drift: '+kind+'/'+n.name);n.parameters.jsCode=code;}}
  if(!check)fs.writeFileSync(file,JSON.stringify(w,null,2));
  }return changed;}
