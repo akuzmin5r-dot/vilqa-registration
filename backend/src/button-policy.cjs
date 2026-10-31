@@ -2,7 +2,8 @@
 function telegramButtonStyle(text='',action='') {
  text=String(text);action=String(action).replace(/^n:\d+:/,'');
  if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';
- if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';
+ if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\s+еду[^а-яёa-z]*$/i.test(text))return '';
+ if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';
  if(/открыть\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';
  return '';
 }

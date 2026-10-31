@@ -96,7 +96,7 @@
                     "text": "✅ Да, записать",
                     "additionalFields": {
                       "callback_data": "={{ 'meal_confirm:' + $json.draft_id }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"✅ Да, записать\",'meal_confirm:' + $json.draft_id) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"✅ Да, записать\",'meal_confirm:' + $json.draft_id) }}"
                     }
                   }
                 ]
@@ -109,7 +109,7 @@
                     "text": "❌ Отменить",
                     "additionalFields": {
                       "callback_data": "={{ 'meal_cancel:' + $json.draft_id }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"❌ Отменить\",'meal_cancel:' + $json.draft_id) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"❌ Отменить\",'meal_cancel:' + $json.draft_id) }}"
                     }
                   }
                 ]
@@ -3047,7 +3047,7 @@
                     "text": "📝 Записать еду",
                     "additionalFields": {
                       "callback_data": "menu_food_entry",
-                      "style": "success"
+                      "style": ""
                     }
                   }
                 ]
@@ -5418,7 +5418,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5463,7 +5463,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5476,7 +5476,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5521,7 +5521,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5534,7 +5534,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5547,7 +5547,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5592,7 +5592,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5605,7 +5605,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5618,7 +5618,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5631,7 +5631,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5678,7 +5678,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5724,7 +5724,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5737,7 +5737,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5783,7 +5783,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5796,7 +5796,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5809,7 +5809,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5855,7 +5855,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5868,7 +5868,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5881,7 +5881,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5894,7 +5894,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5939,7 +5939,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5954,7 +5954,7 @@
                       "web_app": {
                         "url": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.web_app.url }}"
                       },
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,\"\") }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,\"\") }}"
                     }
                   }
                 ]
@@ -5967,7 +5967,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5980,7 +5980,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -5993,7 +5993,7 @@
                     "text": "={{ $json.keyboard.rows[4].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6041,7 +6041,7 @@
                       "web_app": {
                         "url": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.web_app.url }}"
                       },
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,\"\") }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,\"\") }}"
                     }
                   }
                 ]
@@ -6054,7 +6054,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6099,7 +6099,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6112,7 +6112,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6125,7 +6125,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6138,7 +6138,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6151,7 +6151,7 @@
                     "text": "={{ $json.keyboard.rows[4].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6196,7 +6196,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6209,7 +6209,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6222,7 +6222,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6235,7 +6235,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6248,7 +6248,7 @@
                     "text": "={{ $json.keyboard.rows[4].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6261,7 +6261,7 @@
                     "text": "={{ $json.keyboard.rows[5].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[5].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[5].row.buttons[0].text,$json.keyboard.rows[5].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[5].row.buttons[0].text,$json.keyboard.rows[5].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6308,7 +6308,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6321,7 +6321,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6334,7 +6334,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6347,7 +6347,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6360,7 +6360,7 @@
                     "text": "={{ $json.keyboard.rows[4].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6406,7 +6406,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6419,7 +6419,7 @@
                     "text": "={{ $json.keyboard.rows[1].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,$json.keyboard.rows[1].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6432,7 +6432,7 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6445,7 +6445,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6458,7 +6458,7 @@
                     "text": "={{ $json.keyboard.rows[4].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[4].row.buttons[0].text,$json.keyboard.rows[4].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6471,7 +6471,7 @@
                     "text": "={{ $json.keyboard.rows[5].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[5].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[5].row.buttons[0].text,$json.keyboard.rows[5].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[5].row.buttons[0].text,$json.keyboard.rows[5].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6625,7 +6625,7 @@
                     "text": "✅ Всё-таки записать",
                     "additionalFields": {
                       "callback_data": "={{ 'meal_restore:' + $json._meal_card.draft_id }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"✅ Всё-таки записать\",'meal_restore:' + $json._meal_card.draft_id) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"✅ Всё-таки записать\",'meal_restore:' + $json._meal_card.draft_id) }}"
                     }
                   }
                 ]
@@ -6715,7 +6715,7 @@
                     "text": "✅ Всё-таки записать",
                     "additionalFields": {
                       "callback_data": "={{ 'meal_restore:' + $json.result.draft_id }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"✅ Всё-таки записать\",'meal_restore:' + $json.result.draft_id) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})(\"✅ Всё-таки записать\",'meal_restore:' + $json.result.draft_id) }}"
                     }
                   }
                 ]
@@ -6774,7 +6774,7 @@
                     "text": "={{ $json.keyboard.rows[0].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[0].row.buttons[0].text,$json.keyboard.rows[0].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6789,7 +6789,7 @@
                       "web_app": {
                         "url": "={{ $json.keyboard.rows[1].row.buttons[0].additionalFields.web_app.url }}"
                       },
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,\"\") }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[1].row.buttons[0].text,\"\") }}"
                     }
                   }
                 ]
@@ -6802,14 +6802,14 @@
                     "text": "={{ $json.keyboard.rows[2].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[0].text,$json.keyboard.rows[2].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   },
                   {
                     "text": "={{ $json.keyboard.rows[2].row.buttons[1].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[2].row.buttons[1].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[1].text,$json.keyboard.rows[2].row.buttons[1].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[2].row.buttons[1].text,$json.keyboard.rows[2].row.buttons[1].additionalFields.callback_data) }}"
                     }
                   }
                 ]
@@ -6822,7 +6822,7 @@
                     "text": "={{ $json.keyboard.rows[3].row.buttons[0].text }}",
                     "additionalFields": {
                       "callback_data": "={{ $json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data }}",
-                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause|menu_food_entry)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
+                      "style": "={{ (function telegramButtonStyle(text='',action='') {\n text=String(text);action=String(action).replace(/^n:\\d+:/,'');\n if(/^(meal_cancel|recipe_cancel)(:|$)/.test(action)||/отмен/i.test(text))return 'danger';\n if(action==='menu_food_entry'||/^[^а-яёa-z]*записать\\s+еду[^а-яёa-z]*$/i.test(text))return '';\n if(/^(meal_confirm|meal_restore|recipe_save|recipe_pause)(:|$)/.test(action)||/сохран|записать/i.test(text))return 'success';\n if(/открыть\\s+дневник|^[^а-яёa-z]*дневник[^а-яёa-z]*$/i.test(text))return 'success';\n return '';\n})($json.keyboard.rows[3].row.buttons[0].text,$json.keyboard.rows[3].row.buttons[0].additionalFields.callback_data) }}"
                     }
                   }
                 ]
