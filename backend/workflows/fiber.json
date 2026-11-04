@@ -224,346 +224,6 @@
         384
       ],
       "parameters": {}
-    },
-    {
-      "id": "ae081c2c-0144-4554-bd45-58f5b170e40b",
-      "name": "06 · Собрать итог и варианты еды",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        800,
-        320
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "function fiberMessage(s){\n const n=v=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(v);\n const date=String(s.date||'').split('-').reverse().join('.');\n let text=s.deleted?'🌾 <b>Клетчатка · дневник обновлён</b>':s.meal_unknown?'🌾 <b>Клетчатка в приёме пищи: данные неполные</b>':'🌾 <b>Клетчатка в этом приёме пищи: ≈ '+n(s.meal_fiber)+' г</b>';\n text+='\\n\\n'+date+'\\nЗа день: ≈ '+n(s.day_fiber)+' г';\n if(s.day_unknown){text+='\\n<i>Итог неполный: без данных '+n(s.day_unknown)+' записей.</i>\\nДневной ориентир: '+n(s.target)+' г';}\n else if(s.remaining>0){text+='\\nДо дневного ориентира '+n(s.target)+' г осталось: ≈ '+n(s.remaining)+' г';}\n else text+='\\nДневной ориентир '+n(s.target)+' г достигнут';\n if(!s.day_unknown&&s.remaining>0&&!s.deleted){\n  const foods=[{name:'варёная чечевица',fiber:7.9,cal:116,max:150},{name:'малина',fiber:6.5,cal:52,max:150},{name:'брокколи на пару',fiber:3.3,cal:35,max:200},{name:'яблоко с кожурой',fiber:2.4,cal:52,max:200}];\n  const options=foods.map(f=>{const grams=Math.min(f.max,Math.max(30,Math.round(s.remaining/f.fiber*100/10)*10));return {...f,grams,portionFiber:grams*f.fiber/100,portionCal:grams*f.cal/100};}).filter(f=>f.portionCal<=s.remaining_calories&&f.portionFiber<=s.remaining+1).sort((a,b)=>Math.abs(s.remaining-a.portionFiber)-Math.abs(s.remaining-b.portionFiber)).slice(0,2);\n  if(options.length)text+='\\n\\nМожно выбрать один вариант:\\n'+options.map(f=>'• '+f.name+' · '+f.grams+' г — ≈ '+n(f.portionFiber)+' г клетчатки, '+Math.round(f.portionCal)+' ккал').join('\\n');\n }\n return text+'\\n\\n<i>Клетчатка и варианты продуктов — приблизительная оценка.</i>';\n}\nconst s=$input.first().json.summary;\nconst failed=$('04 · Проверить ответ модели').isExecuted && Boolean($('04 · Проверить ответ модели').first().json.model_error);\nconst notice=failed?(s.meal_fiber>0?'Немного задумалась 😅 Клетчатку удалось посчитать не для всех продуктов — пока показываю неполный итог.':'Что-то задумалась 😅 Не удалось рассчитать клетчатку. Еда сохранена, остальные данные на месте.')+'\\n\\n':'';\nreturn [{json:{...s,text:notice+fiberMessage(s)}}];"
-      }
-    },
-    {
-      "id": "10057a92-788c-47f9-bc97-c0475478a91e",
-      "name": "07 · Защитить от повторной отправки",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
-      "position": [
-        1024,
-        320
-      ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT value AS notice FROM vilqa.fiber_queue_notice($1::jsonb) value;",
-        "options": {
-          "queryReplacement": "={{ [JSON.stringify($json.text ? $json : null)] }}",
-          "largeNumbersOutput": "numbers"
-        }
-      },
-      "credentials": {
-        "postgres": {
-          "id": "LjpwMBUFrespnzSR",
-          "name": "Postgres FIX"
-        }
-      }
-    },
-    {
-      "id": "dfef468f-cb06-41c0-a4ca-d94264d84c1b",
-      "name": "08 · Отправить клетчатку в Telegram",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1248,
-        320
-      ],
-      "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
-        "chatId": "={{ $json.notice.user_id }}",
-        "text": "={{ $json.notice.text }}",
-        "additionalFields": {
-          "parse_mode": "HTML",
-          "appendAttribution": false,
-          "disable_web_page_preview": true
-        }
-      },
-      "webhookId": "3688aafb-199c-46be-b913-02263a947df5",
-      "onError": "continueRegularOutput",
-      "credentials": {
-        "telegramApi": {
-          "id": "cxpP4210lq4DP6VB",
-          "name": "VILQA AI"
-        }
-      }
-    },
-    {
-      "id": "7922985e-62be-4d01-93ca-b7fd590f68e5",
-      "name": "09 · Сохранить доставку",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
-      "position": [
-        1472,
-        320
-      ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT vilqa.fiber_finish_notice($1::jsonb,$2::jsonb) AS delivery;",
-        "options": {
-          "queryReplacement": "={{ [JSON.stringify($('07 · Защитить от повторной отправки').first().json.notice),JSON.stringify($json)] }}",
-          "largeNumbersOutput": "numbers"
-        }
-      },
-      "credentials": {
-        "postgres": {
-          "id": "LjpwMBUFrespnzSR",
-          "name": "Postgres FIX"
-        }
-      }
-    },
-    {
-      "id": "bc81df9f-e2ac-4d1c-b7e9-2e2b720ee841",
-      "name": "Статус · начать клетчатку",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.4,
-      "position": [
-        600,
-        600
-      ],
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "pU5WQmFMlj3fc7fa"
-        },
-        "mode": "once",
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "phase": "begin",
-            "user_id": "={{ $('02 · Проверить кэш и состав').first().json.job.user_id }}",
-            "kind": "fiber",
-            "owner": "={{ $execution.id }}",
-            "scope": "={{ $('02 · Проверить кэш и состав').first().json.job.job_key + ':' + $('02 · Проверить кэш и состав').first().json.job.revision }}",
-            "payload": "={{ $json }}"
-          },
-          "schema": [
-            {
-              "id": "phase",
-              "displayName": "phase",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "user_id",
-              "displayName": "user_id",
-              "type": "number",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "kind",
-              "displayName": "kind",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "owner",
-              "displayName": "owner",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "scope",
-              "displayName": "scope",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "payload",
-              "displayName": "payload",
-              "type": "object",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            }
-          ],
-          "matchingColumns": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "notes": "Общий статус: одна анимация, защита от одинакового повторного действия."
-    },
-    {
-      "id": "161ac469-7c76-4ef9-ade4-aed1c952601c",
-      "name": "Статус · закончить клетчатку",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.4,
-      "position": [
-        600,
-        690
-      ],
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "pU5WQmFMlj3fc7fa"
-        },
-        "mode": "once",
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "phase": "end",
-            "user_id": "={{ $('02 · Проверить кэш и состав').first().json.job.user_id }}",
-            "kind": "fiber",
-            "owner": "={{ $execution.id }}",
-            "scope": "={{ $('02 · Проверить кэш и состав').first().json.job.job_key + ':' + $('02 · Проверить кэш и состав').first().json.job.revision }}",
-            "payload": "={{ $json }}"
-          },
-          "schema": [
-            {
-              "id": "phase",
-              "displayName": "phase",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "user_id",
-              "displayName": "user_id",
-              "type": "number",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "kind",
-              "displayName": "kind",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "owner",
-              "displayName": "owner",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "scope",
-              "displayName": "scope",
-              "type": "string",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "payload",
-              "displayName": "payload",
-              "type": "object",
-              "required": false,
-              "display": true,
-              "canBeUsedToMatch": true
-            }
-          ],
-          "matchingColumns": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "notes": "Убирает статус и возвращает исходные данные без изменений."
-    },
-    {
-      "id": "f75aa163-8edd-4ed3-a40c-468b754f8a36",
-      "name": "Уведомлять о новом приёме?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        600,
-        100
-      ],
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "leftValue": "={{ $('02 · Проверить кэш и состав').first().json.job.notify_chat === true }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "true"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      }
-    },
-    {
-      "id": "0d47be17-49a7-42a5-a4bf-3599096123cc",
-      "name": "Закрыть статус нового приёма?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        1000,
-        100
-      ],
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "leftValue": "={{ $('02 · Проверить кэш и состав').first().json.job.notify_chat === true }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "true"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      }
-    },
-    {
-      "id": "34a3b132-6138-488a-8be8-4ec8759dadee",
-      "name": "10 · Проверить подтверждение Telegram",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2200,
-        300
-      ],
-      "parameters": {
-        "jsCode": "const result=$input.first().json.delivery;if(['unknown','failed'].includes(result?.state))throw Error('Fiber Telegram delivery '+result.state+'; inspect vilqa.fiber_deliveries');return $input.all();"
-      }
     }
   ],
   "connections": {
@@ -572,11 +232,6 @@
         [
           {
             "node": "01 · Взять задачу из очереди",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "07 · Защитить от повторной отправки",
             "type": "main",
             "index": 0
           }
@@ -609,7 +264,7 @@
       "main": [
         [
           {
-            "node": "Уведомлять о новом приёме?",
+            "node": "03 · Оценить клетчатку продуктов",
             "type": "main",
             "index": 0
           }
@@ -647,13 +302,7 @@
     },
     "05 · Обновить записи и итог дня": {
       "main": [
-        [
-          {
-            "node": "06 · Собрать итог и варианты еды",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "04 · Использовать готовый расчёт": {
@@ -678,61 +327,6 @@
         ]
       ]
     },
-    "06 · Собрать итог и варианты еды": {
-      "main": [
-        [
-          {
-            "node": "07 · Защитить от повторной отправки",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "07 · Защитить от повторной отправки": {
-      "main": [
-        [
-          {
-            "node": "08 · Отправить клетчатку в Telegram",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "08 · Отправить клетчатку в Telegram": {
-      "main": [
-        [
-          {
-            "node": "09 · Сохранить доставку",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Статус · начать клетчатку": {
-      "main": [
-        [
-          {
-            "node": "03 · Оценить клетчатку продуктов",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Статус · закончить клетчатку": {
-      "main": [
-        [
-          {
-            "node": "04 · Проверить ответ модели",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "После записи еды": {
       "main": [
         [
@@ -744,58 +338,11 @@
         ]
       ]
     },
-    "Уведомлять о новом приёме?": {
-      "main": [
-        [
-          {
-            "node": "Статус · начать клетчатку",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "03 · Оценить клетчатку продуктов",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "03 · Оценить клетчатку продуктов": {
       "main": [
         [
           {
-            "node": "Закрыть статус нового приёма?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Закрыть статус нового приёма?": {
-      "main": [
-        [
-          {
-            "node": "Статус · закончить клетчатку",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
             "node": "04 · Проверить ответ модели",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "09 · Сохранить доставку": {
-      "main": [
-        [
-          {
-            "node": "10 · Проверить подтверждение Telegram",
             "type": "main",
             "index": 0
           }
@@ -815,24 +362,9 @@
         "03 · Оценить клетчатку продуктов",
         "04 · Проверить ответ модели",
         "04 · Использовать готовый расчёт",
-        "05 · Обновить записи и итог дня",
-        "Статус · начать клетчатку",
-        "Статус · закончить клетчатку",
-        "Уведомлять о новом приёме?",
-        "Закрыть статус нового приёма?"
+        "05 · Обновить записи и итог дня"
       ],
-      "description": "Удаление и правки пересчитываются без статуса и сообщений. Новый приём получает статус и уведомление."
-    },
-    {
-      "id": "ef7b5d24-4134-4d96-87d4-0d5d06978ba0",
-      "name": "Итог и доставка",
-      "nodeNames": [
-        "07 · Защитить от повторной отправки",
-        "08 · Отправить клетчатку в Telegram",
-        "09 · Сохранить доставку",
-        "10 · Проверить подтверждение Telegram"
-      ],
-      "description": "Очередь уведомлений → аренда отправки → Telegram → подтверждение. Явные отказы повторяются, неопределённый исход требует проверки."
+      "description": "Фоновый расчёт клетчатки и сохранение в дневник. Без сообщений и индикаторов в Telegram."
     }
   ],
   "settings": {

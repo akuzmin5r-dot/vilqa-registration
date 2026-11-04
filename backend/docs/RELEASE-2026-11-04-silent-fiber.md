@@ -1,0 +1,9 @@
+# Fiber in the diary/statistics only
+
+Removed the standalone fiber result/delivery branch and its chat-status begin/end branches from the published worker. The remaining 11-node workflow still claims jobs, uses cache or the model, validates estimates and calls `fiber_apply` to update diary values. The minute schedule and explicit post-meal trigger remain. No Telegram node, status-helper invocation or notification-queue polling remains, so previously queued notices cannot be sent by this worker. Existing delivery records were preserved as history; no diary/schema migration was required.
+
+One calculation group now describes background computation only. The graph regression test asserts no direct Telegram output or indirect chat-status/notification queue path, and verifies the model-to-validator-to-storage path. All ten maintained suites passed. Published worker version `86861771-32ba-45e2-afb7-4eaf8939abd3`, checked live after publishing. Backup: workspace `backups/2026-11-04-silent-fiber/`.
+
+At the user's explicit request, execution `12912` sent the recovered-meal confirmation and actual current-day statistics to the configured wife's account, with the usual five-second pause. Telegram acknowledged message IDs 4490 and 4491 to user 207093928. The statistics included five diary records totaling 289 kcal; fiber was present with its existing incomplete-data indication. Private delivery receipts are in `backups/2026-11-04-meal-recovery-12838/`, outside Git. Temporary sending nodes were removed, restoring maintenance to two original nodes.
+
+Statistics messages remain snapshots: when a background estimate finishes after a message is sent, updated fiber is available in the Mini App and the next statistics request. This change does not add rich-message editing or delay the normal statistics response while waiting for the fiber model.
