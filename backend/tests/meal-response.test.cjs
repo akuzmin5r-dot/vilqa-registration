@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');
+const {prepareMealAgentResult:prepare}=require('../src/meal-response.cjs');
+const context={chat_id:123,user_id:123,today:'2026-11-04',time:'10:41',now:'2026-11-04T07:41:00Z'};
+const item={item_name:'Тестовый продукт',item_type:'product',weight:100,calories:130,protein:2.5,fats:0.2,carbs:28};
+let r=prepare({error:'Bad request - please check your parameters'},context,'test');
+assert.equal(r.response_error_code,'model_request_failed');assert.equal(r.response_error_kind,'provider_bad_request');assert.equal(r.show_confirm_buttons,false);assert.equal(r.rows,undefined);assert.doesNotMatch(r.text,/Bad request|parameters|token/);
+r=prepare({error:{message:'timeout'}},context,'test');assert.equal(r.response_error_kind,'provider_timeout');
+r=prepare({output:'not JSON'},context,'test');assert.equal(r.response_error_code,'model_output_invalid');assert.equal(r.show_confirm_buttons,false);
+r=prepare({output:{message:'Уточни вес?',items:[]}},context,'test');assert.equal(r.text,'Уточни вес?');assert.equal(r.rows,undefined);
+r=prepare({output:{message:'',items:[item]}},context,'test');assert.equal(r.show_confirm_buttons,true);assert.equal(r.rows[0].user_id,123);
+r=prepare({output:{items:[{...item,weight:'100'}]}},context,'test');assert.equal(r.response_error_code,'model_output_invalid');assert.equal(r.rows,undefined);
+r=prepare({error:'provider refused',output:{items:[item]}},context,'test');assert.equal(r.show_confirm_buttons,false);assert.equal(r.rows,undefined);
+console.log('PASS: provider errors separated from invalid JSON, no unsafe writes, numeric validation preserved');
+const fs=require('node:fs'),path=require('node:path');
+const code=fs.readFileSync(path.resolve(__dirname,'../src/error-alert-node.js'),'utf8');
+const alert=new Function('$input',code)({first:()=>({json:{workflow_id:'a08kQaFjSLUxlmpNlmV2J',event:'model_request_failed',error_code:'provider_bad_request',execution_id:'12838'}})});
+assert.match(alert[0].json.text,/Не удалось получить ответ от AI/);assert.match(alert[0].json.text,/400/);assert.doesNotMatch(alert[0].json.text,/проверку формата/);
